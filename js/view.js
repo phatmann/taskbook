@@ -8,122 +8,31 @@ function View(controller) {
   $('[id]').each(function(){
     self[this.id] = $('#' + this.id);
   });
-}
-
-function TasksView(controller) {
-  TasksView.baseConstructor.call(this, controller);
-  self = this;
   
-  $(this.controller.book).bind('change', function(e, props){
-    self.onBookChange(props);
-  });
-  
-  $(this.controller.book).bind('taskChange', function(e, task){
-    self.onTaskChange(task);
-  });
-  
-  self.prevDateButton.click(function() {
-    self.selectPrevDate();
-  });
-  
-  self.nextDateButton.click(function() {
-    self.selectNextDate();
-  });
-  
-  self.addButton.click(function() {
-    controller.addTask(self.taskGoalField.val());
-    self.taskGoalField.val('');
-  });
-
-  self.taskGoalField.keydown(function(e) {
-    if (e.which == 13) {
-      self.addButton.click();
+  /* Route click handlers to buttons */
+  $('button').click(function(){
+    var handler = self[this.id + 'Click'];
+    
+    if (typeof handler == 'function') {
+      return handler.call(self);
+    } else {
+      console.log('Click on button ' + this.id + ' not handled');
     }
-  });
-  
-  self.dateSelect.change(function() {
-    controller.setCurrentDate(self.selectedDate());
-  });
-  
-  self.loadButton.click(function() {
-    window.localStorage['taskbook_default'] = self.taskDump.val();
-    this.controller.book.load();
-    self.render();
-  });
-  
-  self.completedButton.click(function() {
-    self.markTaskCompleted();
-  });
-  
-  $('.task').live('click', function() {
-    self.popupTask($(this));
-  });
-  
-  $('#taskDump').click(function() {
-    this.select();
-    return false;
+    
+    return true;
   });
 }
 
-function taskFieldString(obj) {
-  if (obj instanceof Date) {
-    return $.datepicker.formatDate('yy M dd', obj);
-  } else {
-    return obj;
-  }
-}
-
-subclass(TasksView, View);
-
-$.extend(TasksView.prototype, {
-  render: function() {
-    this.fillTaskList();
-    this.fillDateSelect();
-  },
-  
-  onBookChange: function(props) {
-    if (props.currentDate) {
-      this.fillActions();
-      this.fillDueTasks();
-    }
-    
-    if (props.tasks) {
-      this.fillTaskList();
-      
-      // TODO: only update these when changed
-      this.fillDateSelect();
-    }
-  },
-  
-  onTaskChange: function(task) {
-    var tasks = $('[value=' + task._id + ']');
-    
-    tasks.each(function() {
-      $(this).toggleClass('completed', task.completionDate !== null);
-    });
-  },
-  
-  fillTaskList: function() {
-    this.fillList(this.taskList, this.controller.book.allTasks());
-    $('#taskDump').val(window.localStorage['taskbook_default']);
-  },
-  
-  fillDateSelect: function() {
-    this.fillList(this.dateSelect, this.controller.book.activeDates);
-    
-    this.fillActions();
-    this.fillDueTasks();
-  },
-  
-  fillActions: function() {
-    this.fillList(this.actionList, this.controller.book.currentTasks());
-  },
-  
-  fillDueTasks: function() {
-    this.fillList(this.dueTaskList, this.controller.book.dueTasks());
-  },
-  
+View.prototype = {
   fillList: function(listElement, list) {
+    function taskFieldString(obj) {
+      if (obj instanceof Date) {
+        return $.datepicker.formatDate('yy M dd', obj);
+      } else {
+        return obj;
+      }
+    }
+    
     var templateRow = listElement.data('template');
     
     if (!templateRow) {
@@ -162,13 +71,83 @@ $.extend(TasksView.prototype, {
       
       listElement.append(row);
     }
+  }
+};
+
+function TasksView(controller) {
+  TasksView.baseConstructor.call(this, controller);
+  var self = this;
+  
+  self.dateSelect.change(function() {
+    controller.setCurrentDate(self.selectedDate());
+  });
+  
+  self.taskGoalField.keydown(function(e) {
+    if (e.which == 13) {
+      self.addButtonClick();
+    }
+  });
+  
+  $('.task').live('click', function() {
+    self.taskClick($(this));
+  });
+  
+  $('#taskDump').click(function() {
+    this.select();
+    return false;
+  });
+  
+  $(this.controller.book).bind('change', function(e, props){
+    self.bookChange(props);
+  });
+  
+  $(this.controller.book).bind('taskChange', function(e, task){
+    self.taskChange(task);
+  });
+}
+
+subclass(TasksView, View);
+
+$.extend(TasksView.prototype, {
+  render: function() {
+    this.fillTaskList();
+    this.fillDateSelect();
   },
   
-  selectedDate: function() {
-    return new Date(this.dateSelect.find('option:selected').val());
+  bookChange: function(props) {
+    if (props.currentDate) {
+      this.fillActions();
+      this.fillDueTasks();
+    }
+    
+    if (props.tasks) {
+      this.fillTaskList();
+      
+      // TODO: only update these when changed
+      this.fillDateSelect();
+    }
   },
   
-  selectPrevDate: function() {
+  taskChange: function(task) {
+    var tasks = $('[value=' + task._id + ']');
+    
+    tasks.each(function() {
+      $(this).toggleClass('completed', task.completionDate !== null);
+    });
+  },
+  
+  addButtonClick: function() {
+    this.taskGoalField.val('');
+    this.controller.addTask(self.taskGoalField.val());
+  },
+  
+  loadButtonClick: function() {
+    window.localStorage['taskbook_default'] = self.taskDump.val(); // TODO: move out of view code
+    this.controller.book.load();
+    this.render();
+  },
+  
+  prevDateButtonClick: function() {
     var opt = this.dateSelect.find('option:selected').prev();
     
     if (opt) {
@@ -177,13 +156,47 @@ $.extend(TasksView.prototype, {
     }
   },
   
-  selectNextDate: function() {
+  nextDateButtonClick: function() {
     var opt = this.dateSelect.find('option:selected').next();
     
     if (opt) {
       opt.attr('selected', true);
       this.dateSelect.change();
     }
+  },
+  
+  completedButtonClick: function() {
+    var task = this.taskPopup.data('task');
+    this.popupTask();
+    this.controller.markTaskCompleted(task);
+  },
+  
+  taskClick: function(task) {
+    this.popupTask(task);
+  },
+  
+  fillTaskList: function() {
+    this.fillList(this.taskList, this.controller.book.allTasks());
+    $('#taskDump').val(window.localStorage['taskbook_default']);
+  },
+  
+  fillDateSelect: function() {
+    this.fillList(this.dateSelect, this.controller.book.activeDates);
+    
+    this.fillActions();
+    this.fillDueTasks();
+  },
+  
+  fillActions: function() {
+    this.fillList(this.actionList, this.controller.book.currentTasks());
+  },
+  
+  fillDueTasks: function() {
+    this.fillList(this.dueTaskList, this.controller.book.dueTasks());
+  },
+  
+  selectedDate: function() {
+    return new Date(this.dateSelect.find('option:selected').val());
   },
   
   popupTask: function(taskRow) {
@@ -209,19 +222,11 @@ $.extend(TasksView.prototype, {
     
     this.taskPopup
       .data('taskRow', taskRow)
+      .data('task', task)
       .css( {
         left: taskRow.find('.goal').offset().left + "px", 
         top: taskRow.offset().top + taskRow.outerHeight() + 1 + "px"
       })
       .slideDown("fast");
-  },
-  
-  markTaskCompleted: function() {
-    var taskRow = this.taskPopup.data('taskRow');
-    var taskID  = taskRow.attr('value');
-    var task    = this.controller.book.getTask(taskID);
-    
-    task.toggleComplete();
-    this.popupTask();
   }
 });

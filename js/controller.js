@@ -22,5 +22,9 @@ TasksController.prototype = {
   
   setCurrentDate: function(date) {
     this.book.update({currentDate: date});
+  },
+  
+  markTaskCompleted: function(task) {
+    task.toggleComplete();
   }
 };
