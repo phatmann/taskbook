@@ -1,0 +1,37 @@
+#content {
+  width: 100%;
+  overflow: hidden;
+}
+
+.task .createDate, .task .dueDate {
+  font-size: 9px;
+}
+
+#leftCol {
+  float:left;
+  width: 40%;
+}
+
+#rightCol {
+  float:left;
+  width: 50%;
+}
+
+#taskGoalField {
+  resize: none;
+  height: 1.5em;
+}
+
+#taskDump {
+  margin-top: 50px;
+  height: 100px;
+  width: 400px;
+}
+
+#taskPopup {
+  display: none;
+}
+
+.completed {
+  text-decoration: line-through;
+}
