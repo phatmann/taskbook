@@ -3,6 +3,14 @@
   overflow: hidden;
 }
 
+.task {
+  cursor: pointer;
+}
+
+.task .goal:hover {
+  text-decoration: underline;
+}
+
 .task .createDate, .task .dueDate {
   font-size: 9px;
 }
@@ -30,6 +38,9 @@
 
 #taskPopup {
   display: none;
+  position: absolute;
+  background-color: white;
+  border: solid 1px gray;
 }
 
 .completed {

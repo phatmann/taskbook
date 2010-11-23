@@ -26,3 +26,14 @@ Array.prototype.unique = function(transform) {
 		return $(this).get(0)==$(selector).get(0);
 	};
 })(jQuery);
+
+// http://www.kevlindev.com/tutorials/javascript/inheritance/index.htm
+function subclass(subClass, baseClass) {
+   function Inheritance() {}
+   Inheritance.prototype = baseClass.prototype;
+
+   subClass.prototype = new Inheritance();
+   subClass.prototype.constructor = subClass;
+   subClass.baseConstructor = baseClass;
+   subClass.superClass = baseClass.prototype;
+}

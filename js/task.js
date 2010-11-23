@@ -3,13 +3,15 @@ var MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 // TODO: deal with UTC issues
 
-function Task(attrs) {
+function Task(book, attrs) {
+  this.book = book;
+  
   if (typeof attrs == 'string') {
     attrs = {goal:attrs};
   }
   
   this.goal             = attrs.goal;
-  this._id              = attrs._id || taskBook.nextTaskID++;
+  this._id              = attrs._id || this.book.nextTaskID++;
   this.completionDate   = null;
   
   if (attrs.createDate) {
@@ -31,6 +33,10 @@ function Task(attrs) {
     var t = this.startDate.getTime() + DUE_DATE_DAYS_AHEAD * MS_PER_DAY;
     this.dueDate.setTime(t);
   }
+  
+  if (attrs.completionDate) {
+    this.completionDate = new Date(attrs.completionDate).clearTime();
+  }
 }
 
 Task.prototype = { 
@@ -41,6 +47,6 @@ Task.prototype = {
       this.completionDate = null;
     }
     
-    taskBook.taskChanged(this);
+    this.book.taskChanged(this);
   }
 };

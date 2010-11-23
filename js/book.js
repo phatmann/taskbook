@@ -23,7 +23,7 @@ TaskBook.prototype = {
 
       if (tasks && tasks.length > 0) {
         for (var i = 0; i < tasks.length; ++i) {
-          this.add(new Task(tasks[i]));
+          this.add(new Task(this, tasks[i]));
         } 
 
         if (tb['nextID']) {
@@ -34,7 +34,7 @@ TaskBook.prototype = {
       }
     }
     
-    this.loadActiveDates();
+    //this.loadActiveDates(); DONE on every add!
     
     if (this.activeDates.length > 0) {
       this.currentDate = this.activeDates[0];
@@ -43,9 +43,16 @@ TaskBook.prototype = {
   
   save: function() {
     var tb = {tasks: this.tasks, nextTaskID: this.nextTaskID};
-    var ts = JSON.stringify(tb);
+    
+    var ts = JSON.stringify(tb, function(key, value) {
+      if (key == 'book') {
+        return undefined;
+      } else {
+        return value;
+      }
+    });
+    
     window.localStorage['taskbook_' + this.bookID] = ts;
-    $('#taskDump').val(ts);
   },
   
   update: function(props) {
@@ -73,8 +80,6 @@ TaskBook.prototype = {
     this.loadActiveDates(); // TODO: update incrementally
     
     $(this).trigger('change', {tasks: this.tasks});
-    
-    // TODO: did not cause view to reload active dates
   },
   
   loadActiveDates: function() {

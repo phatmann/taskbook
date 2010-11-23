@@ -1,10 +1,18 @@
-function TasksView(controller) {
+/*global subclass */
+
+function View(controller) {
+  this.controller = controller;
   var self = this;
-  self.controller = controller;
   
+  /* Cache view elements */
   $('[id]').each(function(){
     self[this.id] = $('#' + this.id);
   });
+}
+
+function TasksView(controller) {
+  TasksView.baseConstructor.call(this, controller);
+  self = this;
   
   $(this.controller.book).bind('change', function(e, props){
     self.onBookChange(props);
@@ -65,7 +73,9 @@ function taskFieldString(obj) {
   }
 }
 
-TasksView.prototype = {
+subclass(TasksView, View);
+
+$.extend(TasksView.prototype, {
   render: function() {
     this.fillTaskList();
     this.fillDateSelect();
@@ -81,8 +91,7 @@ TasksView.prototype = {
       this.fillTaskList();
       
       // TODO: only update these when changed
-      this.fillActions();
-      this.fillDueTasks();
+      this.fillDateSelect();
     }
   },
   
@@ -96,6 +105,7 @@ TasksView.prototype = {
   
   fillTaskList: function() {
     this.fillList(this.taskList, this.controller.book.allTasks());
+    $('#taskDump').val(window.localStorage['taskbook_default']);
   },
   
   fillDateSelect: function() {
@@ -122,7 +132,7 @@ TasksView.prototype = {
       listElement.data('template', templateRow);
     }
     
-    listElement.children().remove();
+    listElement.html('');
     
     for (var i = 0; i < list.length; ++i) {
       var item = list[i];
@@ -152,7 +162,7 @@ TasksView.prototype = {
       
       listElement.append(row);
     }
- },
+  },
   
   selectedDate: function() {
     return new Date(this.dateSelect.find('option:selected').val());
@@ -179,18 +189,31 @@ TasksView.prototype = {
   popupTask: function(taskRow) {
     if (this.taskPopup.is(':visible')) {
       var oldTaskRow = this.taskPopup.data('taskRow');
-      oldTaskRow.css('font-weight', 'normal');
+      //oldTaskRow.css('text-decoration', 'none');
       
-      if (oldTaskRow.equals(taskRow)) {
-        this.taskPopup.slideUp();
+      if (!taskRow || oldTaskRow.equals(taskRow)) {
+        this.taskPopup.slideUp("fast");
         return;
       }
     }
     
     var taskID = taskRow.attr('value');
     var task = this.controller.book.getTask(taskID);
-    taskRow.css('font-weight', 'bold');
-    this.taskPopup.data('taskRow', taskRow).slideDown();
+    //taskRow.css('text-decoration', 'underline');
+    
+    if (task.completionDate) {
+      this.completedButton.text('Incomplete');
+    } else {
+      this.completedButton.text('Complete');
+    }
+    
+    this.taskPopup
+      .data('taskRow', taskRow)
+      .css( {
+        left: taskRow.find('.goal').offset().left + "px", 
+        top: taskRow.offset().top + taskRow.outerHeight() + 1 + "px"
+      })
+      .slideDown("fast");
   },
   
   markTaskCompleted: function() {
@@ -199,5 +222,6 @@ TasksView.prototype = {
     var task    = this.controller.book.getTask(taskID);
     
     task.toggleComplete();
+    this.popupTask();
   }
-};
+});
