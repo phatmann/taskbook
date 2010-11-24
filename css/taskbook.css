@@ -16,7 +16,7 @@ body {
   text-decoration: underline;
 }
 
-.task .createDate, .task .dueDate {
+.task .startDate, .task .dueDate {
   font-size: 7pt;
 }
 
