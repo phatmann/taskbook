@@ -13,7 +13,7 @@ TasksController.prototype = {
     }
     
     for (var i = 0; i < goals.length; ++i) {
-      var t = new Task(goals[i]);
+      var t = new Task(this.book, goals[i]);
       this.book.add(t);
     }
     
@@ -36,6 +36,10 @@ TasksController.prototype = {
   setTaskDueDate: function(task, date) {
     task.dueDate = date;
     this.book.taskChanged(task);
+  },
+  
+  deleteTask: function(task) {
+    this.book.deleteTask(task);
   },
   
   loadFromDump: function(dump) {

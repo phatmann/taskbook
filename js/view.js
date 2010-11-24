@@ -215,6 +215,12 @@ $.extend(TasksView.prototype, {
     this.controller.setTaskDueDate(task, this.dueDateField.datepicker('getDate'));
   },
   
+  deleteButtonClick: function() {
+    var task = this.taskPopup.data('task');
+    this.toggleTaskPopup();
+    this.controller.deleteTask(task);
+  },
+  
   fillTaskList: function() {
     this.fillList(this.taskList, this.controller.book.allTasks());
     $('#taskDump').val(window.localStorage['taskbook_default']);

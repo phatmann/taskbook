@@ -82,6 +82,22 @@ TaskBook.prototype = {
     $(this).trigger('change', {tasks: this.tasks});
   },
   
+  deleteTask: function(task) {
+    function removeFromIndex(task, index, date) {
+      var key = date.toString();
+      var indexEntry = index[key];
+    
+      if (indexEntry) {
+        indexEntry.splice(indexEntry.indexOf(task), 1);
+      }
+    }
+    
+    this.tasks.splice(this.tasks.indexOf(task), 1);
+    delete this.idIndex[task._id];
+    removeFromIndex(task, this.startDateIndex, task.startDate);
+    removeFromIndex(task, this.dueDateIndex,   task.dueDate);
+  },
+  
   loadActiveDates: function() {
     var dates = [];
     
