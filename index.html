@@ -19,9 +19,6 @@
       <div id="leftCol">
         <textarea id="taskGoalField" type="text"></textarea>
         <button id="addButton">Add</button>
-        <div id="taskPopup">
-          <button id="completedButton">Completed</button>
-        </div>
         <table id="taskList">
           <tr class="task template">
             <td class="createDate"></td>
@@ -53,6 +50,13 @@
       </div>
     </div>
   
+    <div id="taskPopup">
+      <input type="text" id="startDateField" class="dateField" />
+      <button id="completedButton"></button>
+      <button id="deleteButton">Delete</button>
+      <input type="text" id="dueDateField" class="dateField" />
+    </div>
+        
     <textarea id="taskDump"></textarea>
     <button id="loadButton">Load</button>
   </body>

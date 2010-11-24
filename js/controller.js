@@ -26,5 +26,20 @@ TasksController.prototype = {
   
   markTaskCompleted: function(task) {
     task.toggleComplete();
+  },
+  
+  setTaskStartDate: function(task, date) {
+    task.startDate = date;
+    this.book.taskChanged(task);
+  },
+  
+  setTaskDueDate: function(task, date) {
+    task.dueDate = date;
+    this.book.taskChanged(task);
+  },
+  
+  loadFromDump: function(dump) {
+    window.localStorage['taskbook_default'] = dump;
+    this.book.load();
   }
 };

@@ -1,3 +1,7 @@
+body {
+  font-size: 10pt;
+}
+
 #content {
   width: 100%;
   overflow: hidden;
@@ -5,6 +9,7 @@
 
 .task {
   cursor: pointer;
+  font-size: 12pt;
 }
 
 .task .goal:hover {
@@ -12,7 +17,7 @@
 }
 
 .task .createDate, .task .dueDate {
-  font-size: 9px;
+  font-size: 7pt;
 }
 
 #leftCol {
@@ -45,4 +50,12 @@
 
 .completed {
   text-decoration: line-through;
+}
+
+.selected {
+  background-color: #cccccc;
+}
+
+.dateField {
+  width: 75px;
 }

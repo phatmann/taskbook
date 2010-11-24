@@ -10,6 +10,7 @@ function View(controller) {
   });
   
   /* Route click handlers to buttons */
+  // TODO: put in router method, for subclasses to override
   $('button').click(function(){
     var handler = self[this.id + 'Click'];
     
@@ -24,15 +25,33 @@ function View(controller) {
 }
 
 View.prototype = {
-  fillList: function(listElement, list) {
-    function taskFieldString(obj) {
-      if (obj instanceof Date) {
-        return $.datepicker.formatDate('yy M dd', obj);
-      } else {
-        return obj;
+  displayString: function(obj) {
+    if (obj instanceof Date) {
+      return $.datepicker.formatDate('yy M dd', obj);
+    } else {
+      return obj;
+    }
+  },
+  
+  fillRow: function(row, item) {
+    for (var field in item) {
+      var elem = row.find('.' + field);
+    
+      if (elem.length > 0) {
+        elem.html(this.displayString(item[field]));
       }
     }
     
+    // TODO: code below should be in subclass
+    
+    if (item._id) {
+      row.attr('value', item._id);
+    }
+    
+    row.toggleClass('completed', item.completionDate !== null);
+  },
+  
+  fillList: function(listElement, list) {
     var templateRow = listElement.data('template');
     
     if (!templateRow) {
@@ -49,24 +68,10 @@ View.prototype = {
       row.removeClass('template');
       
       if (item instanceof Date) {
-        row.html(taskFieldString(item));
+        row.html(this.displayString(item));
         row.attr('value', item.toString());
       } else {
-        for (var field in item) {
-          var elem = row.find('.' + field);
-        
-          if (elem.length > 0) {
-            elem.html(taskFieldString(item[field]));
-          }
-        }
-        
-        if (item._id) {
-          row.attr('value', item._id);
-        }
-        
-        if (item.completionDate) {
-          row.addClass('completed');
-        }
+        this.fillRow(row, item);
       }
       
       listElement.append(row);
@@ -76,39 +81,62 @@ View.prototype = {
 
 function TasksView(controller) {
   TasksView.baseConstructor.call(this, controller);
-  var self = this;
+  this.router();
   
-  self.dateSelect.change(function() {
-    controller.setCurrentDate(self.selectedDate());
-  });
-  
-  self.taskGoalField.keydown(function(e) {
-    if (e.which == 13) {
-      self.addButtonClick();
+  /* Set up date fields */
+  $('.dateField').datepicker({
+    xaltField: '#tickler_date',
+    xaltFormat: 'yy-mm-dd',
+    xautoSize: true,
+    dateFormat: 'yy M dd',
+    onSelect: function() {
+      $(this).trigger('dateChange');
     }
-  });
-  
-  $('.task').live('click', function() {
-    self.taskClick($(this));
-  });
-  
-  $('#taskDump').click(function() {
-    this.select();
-    return false;
-  });
-  
-  $(this.controller.book).bind('change', function(e, props){
-    self.bookChange(props);
-  });
-  
-  $(this.controller.book).bind('taskChange', function(e, task){
-    self.taskChange(task);
   });
 }
 
 subclass(TasksView, View);
 
 $.extend(TasksView.prototype, {
+  router: function() {
+    var self = this;
+  
+    self.dateSelect.change(function() {
+      self.controller.setCurrentDate(self.selectedDate());
+    });
+  
+    self.taskGoalField.keydown(function(e) {
+      if (e.which == 13) {
+        self.addButtonClick();
+      }
+    });
+  
+    $('.task').live('click', function() {
+      self.taskClick($(this));
+    });
+  
+    self.taskDump.click(function() {
+      this.select();
+      return false;
+    });
+    
+    self.startDateField.bind('dateChange', function() {
+      self.startDateFieldDateChange();
+    });
+    
+    self.dueDateField.bind('dateChange', function() {
+      self.dueDateFieldDateChange();
+    });
+  
+    $(self.controller.book).bind('change', function(e, props){
+      self.bookChange(props);
+    });
+  
+    $(self.controller.book).bind('taskChange', function(e, task){
+      self.taskChange(task);
+    });
+  },
+  
   render: function() {
     this.fillTaskList();
     this.fillDateSelect();
@@ -129,21 +157,21 @@ $.extend(TasksView.prototype, {
   },
   
   taskChange: function(task) {
-    var tasks = $('[value=' + task._id + ']');
+    var taskRows = $('[value=' + task._id + ']');
+    var self = this;
     
-    tasks.each(function() {
-      $(this).toggleClass('completed', task.completionDate !== null);
+    taskRows.each(function() {
+      self.fillRow($(this), task);
     });
   },
   
   addButtonClick: function() {
+    this.controller.addTask(this.taskGoalField.val());
     this.taskGoalField.val('');
-    this.controller.addTask(self.taskGoalField.val());
   },
   
   loadButtonClick: function() {
-    window.localStorage['taskbook_default'] = self.taskDump.val(); // TODO: move out of view code
-    this.controller.book.load();
+    this.controller.loadFromDump(this.taskDump.val());
     this.render();
   },
   
@@ -167,12 +195,24 @@ $.extend(TasksView.prototype, {
   
   completedButtonClick: function() {
     var task = this.taskPopup.data('task');
-    this.popupTask();
+    this.toggleTaskPopup();
     this.controller.markTaskCompleted(task);
   },
   
   taskClick: function(task) {
-    this.popupTask(task);
+    this.toggleTaskPopup(task);
+  },
+  
+  startDateFieldDateChange: function() {
+    var task = this.taskPopup.data('task');
+    this.toggleTaskPopup();
+    this.controller.setTaskStartDate(task, this.startDateField.datepicker('getDate'));
+  },
+  
+  dueDateFieldDateChange: function() {
+    var task = this.taskPopup.data('task');
+    this.toggleTaskPopup();
+    this.controller.setTaskDueDate(task, this.dueDateField.datepicker('getDate'));
   },
   
   fillTaskList: function() {
@@ -199,10 +239,10 @@ $.extend(TasksView.prototype, {
     return new Date(this.dateSelect.find('option:selected').val());
   },
   
-  popupTask: function(taskRow) {
+  toggleTaskPopup: function(taskRow) {
     if (this.taskPopup.is(':visible')) {
       var oldTaskRow = this.taskPopup.data('taskRow');
-      //oldTaskRow.css('text-decoration', 'none');
+      oldTaskRow.removeClass('selected');
       
       if (!taskRow || oldTaskRow.equals(taskRow)) {
         this.taskPopup.slideUp("fast");
@@ -211,8 +251,9 @@ $.extend(TasksView.prototype, {
     }
     
     var taskID = taskRow.attr('value');
-    var task = this.controller.book.getTask(taskID);
-    //taskRow.css('text-decoration', 'underline');
+    var task   = this.controller.book.getTask(taskID);
+    
+    taskRow.addClass('selected');
     
     if (task.completionDate) {
       this.completedButton.text('Incomplete');
@@ -220,11 +261,14 @@ $.extend(TasksView.prototype, {
       this.completedButton.text('Complete');
     }
     
+    this.startDateField.datepicker('setDate', task.startDate);
+    this.dueDateField.datepicker('setDate', task.dueDate);
+    
     this.taskPopup
       .data('taskRow', taskRow)
       .data('task', task)
       .css( {
-        left: taskRow.find('.goal').offset().left + "px", 
+        left: taskRow.offset().left + "px", 
         top: taskRow.offset().top + taskRow.outerHeight() + 1 + "px"
       })
       .slideDown("fast");
