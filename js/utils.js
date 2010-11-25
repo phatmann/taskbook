@@ -1,11 +1,4 @@
-Date.prototype.clearTime = function() 
-{
-  this.setHours(0); 
-  this.setMinutes(0);
-  this.setSeconds(0); 
-  this.setMilliseconds(0);
-  return this;
-};
+
 
 // http://www.martienus.com/code/javascript-remove-duplicates-from-array.html
 Array.prototype.unique = function(transform) {
@@ -37,3 +30,43 @@ function subclass(subClass, baseClass) {
    subClass.baseConstructor = baseClass;
    subClass.superClass = baseClass.prototype;
 }
+
+
+function YMD(dateOrYear, month, day) {
+  if (dateOrYear.getFullYear) {
+    this.year  = dateOrYear.getFullYear();
+    this.month = dateOrYear.getMonth() + 1;
+    this.day   = dateOrYear.getDay();
+  } else if (typeof dateOrYear == 'string') {
+    var a = dateOrYear.split('-');
+    this.year  = parseInt(a[0], 10);
+    this.month = parseInt(a[1], 10);
+    this.day   = parseInt(a[2], 10);
+  } else {
+    this.year  = dateOrYear;
+    this.month = month;
+    this.day   = day;
+  }
+}
+
+YMD.MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+YMD.now = function() {
+  return new YMD(new Date());
+};
+
+YMD.prototype = {
+  toString: function() {
+    return this.year + '-' + this.month + '-' + this.day;
+  },
+  
+  toDate: function() {
+    return new Date(this.year, this.month, this.day, 0, 0, 0, 0);
+  },
+  
+  addDays: function(days) {
+    var d = this.toDate();
+    d.setTime(d.getTime() + days * YMD.MS_PER_DAY);
+    return new YMD(d);
+  }
+};

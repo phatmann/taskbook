@@ -1,7 +1,6 @@
-var DUE_DATE_DAYS_AHEAD = 30;
-var MS_PER_DAY = 24 * 60 * 60 * 1000;
+/*global YMD */
 
-// TODO: deal with UTC issues
+var DUE_DATE_DAYS_AHEAD = 30;
 
 function Task(book, attrs) {
   this.book = book;
@@ -15,34 +14,32 @@ function Task(book, attrs) {
   this.completionDate   = null;
   
   if (attrs.createDate) {
-    this.createDate = new Date(attrs.createDate).clearTime();
+    this.createDate = attrs.createDate;
   } else {
-    this.createDate = new Date().clearTime();
+    this.createDate = YMD.now().toString();
   }
   
   if (attrs.startDate) {
-    this.startDate = new Date(attrs.startDate).clearTime();
+    this.startDate = attrs.startDate;
   } else {
     this.startDate = this.createDate;
   }
   
   if (attrs.dueDate) {
-    this.dueDate = new Date(attrs.dueDate).clearTime();
+    this.dueDate = attrs.dueDate;
   } else {
-    this.dueDate = new Date().clearTime();
-    var t = this.startDate.getTime() + DUE_DATE_DAYS_AHEAD * MS_PER_DAY;
-    this.dueDate.setTime(t);
+    this.dueDate = new YMD(this.startDate).addDays(DUE_DATE_DAYS_AHEAD).toString();
   }
   
   if (attrs.completionDate) {
-    this.completionDate = new Date(attrs.completionDate).clearTime();
+    this.completionDate = attrs.completionDate;
   }
 }
 
 Task.prototype = { 
   toggleComplete: function() {
     if (this.completionDate === null) {
-      this.completionDate = new Date().clearTime();
+      this.completionDate = new YMD.now();
     } else {
       this.completionDate = null;
     }

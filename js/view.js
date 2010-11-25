@@ -25,20 +25,20 @@ function View(controller) {
 }
 
 View.prototype = {
-  displayString: function(obj) {
-    if (obj instanceof Date) {
-      return $.datepicker.formatDate('yy M dd', obj);
-    } else {
-      return obj;
-    }
-  },
+  // displayString: function(obj) {
+  //   if (obj instanceof Date) {
+  //     return $.datepicker.formatDate('yy M dd', obj);
+  //   } else {
+  //     return obj;
+  //   }
+  // },
   
   fillRow: function(row, item) {
     for (var field in item) {
       var elem = row.find('.' + field);
     
       if (elem.length > 0) {
-        elem.html(this.displayString(item[field]));
+        elem.html(item[field]);
       }
     }
     
@@ -67,11 +67,11 @@ View.prototype = {
       var row = templateRow.clone();
       row.removeClass('template');
       
-      if (item instanceof Date) {
-        row.html(this.displayString(item));
-        row.attr('value', item.toString());
-      } else {
+      if (typeof item == 'object') {
         this.fillRow(row, item);
+      } else {
+        row.html(item);
+        row.attr('value', item);
       }
       
       listElement.append(row);
@@ -242,7 +242,7 @@ $.extend(TasksView.prototype, {
   },
   
   selectedDate: function() {
-    return new Date(this.dateSelect.find('option:selected').val());
+    return this.dateSelect.find('option:selected').val();
   },
   
   toggleTaskPopup: function(taskRow) {

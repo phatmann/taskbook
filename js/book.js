@@ -102,19 +102,15 @@ TaskBook.prototype = {
   },
   
   loadActiveDates: function() {
-    var dates = [];
-    
     for (var d in this.startDateIndex) {
-      dates.push(d);
+      this.activeDates.push(d);
     }
     
     for (d in this.dueDateIndex) {
-      dates.push(d);
+      this.activeDates.push(d);
     }
     
-    this.activeDates = dates.unique(function(d) {
-      return new Date(d);
-    });
+    this.activeDates = this.activeDates.unique();
   },
   
   getTask: function(id) {
