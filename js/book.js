@@ -74,12 +74,12 @@ TaskBook.prototype = {
     
     this.tasks.push(task);
     this.idIndex[task._id] = task;
-    
     addToIndex(task, this.startDateIndex, task.startDate);
     addToIndex(task, this.dueDateIndex,   task.dueDate);
+    
     this.loadActiveDates(); // TODO: update incrementally
     
-    $(this).trigger('change', {tasks: this.tasks});
+    $(this).trigger('change', {tasks: this.tasks}); // TODO: avoid this overhead on load
   },
   
   deleteTask: function(task) {
@@ -96,6 +96,9 @@ TaskBook.prototype = {
     delete this.idIndex[task._id];
     removeFromIndex(task, this.startDateIndex, task.startDate);
     removeFromIndex(task, this.dueDateIndex,   task.dueDate);
+    
+    $(this).trigger('change', {tasks: this.tasks});
+    this.save();
   },
   
   loadActiveDates: function() {
