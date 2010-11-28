@@ -5,7 +5,11 @@ $(function() {
   
   module('Book', {
     setup: function() {
+      book = new TaskBook('test');
     }
+  });
+  
+  test('Can create TaskBook', function() {
   });
   
   // test('Active dates', function() {

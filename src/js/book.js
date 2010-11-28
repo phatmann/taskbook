@@ -1,7 +1,7 @@
 /*global Collection Task subclass */
 
-function TaskBook(bookID, groupings) {
-  TaskBook.baseConstructor.call(this, {collectionID:'taskbook_' + bookID, groupings:groupings});
+function TaskBook(bookID) {
+  TaskBook.baseConstructor.call(this, {collectionID:'taskbook_' + bookID, groupings:['startDate', 'dueDate']});
   this.currentDate  = null;
 }
 

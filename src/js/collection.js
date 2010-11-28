@@ -84,6 +84,10 @@ function Collection(props) {
 
 Collection.prototype = {
   init: function(props) {
+    if (!props) {
+      props = {};
+    }
+    
     this.items          = props.items || [];
     this.collectionID   = props.collectionID || "default";
     this.idIndex        = new Index('itemID');
@@ -182,7 +186,15 @@ Collection.prototype = {
   },
   
   groups: function(property) {
-    return this.groupings[property].groups();
+    if (this.groupings) {
+      var grouping =  this.groupings[property];
+      
+      if (grouping) {
+        return grouping.groups();
+      }
+    }
+      
+    return [];
   },
   
   beforeItemChanged: function(item, property) {

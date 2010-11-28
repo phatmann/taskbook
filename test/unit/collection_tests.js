@@ -27,7 +27,11 @@ $(function() {
     }
   });
   
-  test('Save collection to storage' , function() {
+  test('Can init blank collection', function() {
+    var collection2 = new Collection();
+  });
+  
+  test('Should save collection to storage' , function() {
     expect(2);
     collection.save();
     var stored = JSON.parse(window.localStorage['collection_test']);
@@ -36,7 +40,7 @@ $(function() {
   });
   
   
-  test('Load collection from storage' , function() {
+  test('Should load collection from storage' , function() {
   	expect(3);
   	collection.save();
   	var collection2 = new Collection('test');
@@ -46,24 +50,40 @@ $(function() {
   	ok(collection == collection.items[0].collection, 'First item refers to collection');
   });
   
-  test('Get item', function() {
+  test('Should auto-assign item ID', function() {
+    equal(2, collection.items[1].itemID, 'Second item ID should be 2');
+  });
+  
+  test('Should get item', function() {
     expect(2);
     var item = collection.items[0];
     equal(collection.get(item.itemID).itemID, item.itemID, 'ID of fetched item');
     ok(collection == item.collection, 'Fetched item refers to collection');
   });
   
-  test('Grouped by prop1', function() {
+  test('Should group by a property', function() {
     expect(2);
     var group = collection.group('prop1', '2010-01-01');
     equal(group.length, 2, 'Items in group');
     ok(group.indexOf(collection.items[0]) != -1, 'First item is in group');
   });
   
-  test('Grouped by prop2', function() {
+  test('Should group by a second property', function() {
     expect(2);
     var group = collection.group('prop2', '2010-04-01');
     equal(group.length, 1, 'Items in group');
     ok(group.indexOf(collection.items[1]) != -1, 'Second item is in group');
+  });
+  
+  test('Should remove item from collection and group', function() {
+    expect(4);
+    var item = collection.items[1];
+    collection.remove(item);
+    equal(2, collection.items.length, 'Items');
+    ok(collection.items.indexOf(item) == -1, 'Items array does not include removed item');
+    
+    var group = collection.group('prop1', '2010-04-01');
+    equal(group.length, 0, 'Items in group');
+    ok(group.indexOf(item) == -1, 'Item is not in group');
   });
 });

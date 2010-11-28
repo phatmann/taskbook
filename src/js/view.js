@@ -221,7 +221,7 @@ $.extend(TasksView.prototype, {
   },
   
   fillTaskList: function() {
-    this.fillList(this.taskList, this.controller.book.allTasks());
+    this.fillList(this.taskList, this.controller.book.all());
     $('#taskDump').val(window.localStorage['taskbook_default']);
   },
   
