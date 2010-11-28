@@ -38,18 +38,21 @@ Index.prototype = {
 
 function Grouping(property) {
   Grouping.baseConstructor.call(this, property);
-  this.event = {groupChanged: new Event(this), groupAdded: new Event(this), groupRemoved: new Event(this)};
+  Event.map(this, ['groupChanged', 'groupAdded', 'groupRemoved']);
 }
 
 subclass(Grouping, Index);
 
+// TODO: use base class methods to modify entries array
+    
 $.extend(Grouping.prototype, {
-  group: function(obj, autocreate) {
+  group: function(obj) {
     var key = this.propertyKey(obj);
     var group = this.entries[key];
     
-    if (autocreate && !group) {
+    if (!group) {
       group = this.entries[key] = [];
+      this.event.groupAdded.notify(key);
     }
     
     return group;
@@ -58,23 +61,31 @@ $.extend(Grouping.prototype, {
   groups: Index.prototype.keys,
   
   add: function(obj) {
-    this.group(obj, true).push(obj);
+    this.group(obj).push(obj);
+    this.event.groupChanged.notify(this.propertyKey(obj));
   },
   
+  // TODO: test group removal
+  
   remove: function(obj) {
-    var group = this.group(obj);
+    var key = this.propertyKey(obj);
+    var group = this.entries[key];
       
     if (group) {
       var n = group.indexOf(obj);
   
       if (n != -1) {
         group.splice(n, 1);
+        
+        if (group.length === 0) {
+          delete this.entries[key];
+          this.event.groupRemoved.notify(key);
+        }
       }
     }
   },
   
   get: function(key) {
-    // TODO: use base class get() method
     return this.entries[this.key(key)] || [];
   }
 });

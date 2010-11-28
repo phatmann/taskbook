@@ -2,7 +2,6 @@
 
 function TasksController(book) {
   this.book       = book;
-  this.dateGroups = null;
 }
 
 TasksController.prototype = {
@@ -37,15 +36,5 @@ TasksController.prototype = {
   loadFromDump: function(dump) {
     window.localStorage['collection_taskbook_default'] = dump;
     this.book.load();
-  },
-  
-  activeDates: function() {
-    // TODO: update incrementally
-    
-    //if (!this.dateGroups) {
-      this.dateGroups = this.book.groups('startDate').concat(this.book.groups('dueDate')).unique().sort();
-    //}
-    
-    return this.dateGroups;
   }
 };

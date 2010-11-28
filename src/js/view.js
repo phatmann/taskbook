@@ -232,7 +232,7 @@ $.extend(TasksView.prototype, {
   },
   
   fillDateSelect: function() {
-    this.fillList(this.dateSelect, this.controller.activeDates());
+    this.fillList(this.dateSelect, this.controller.book.activeDates());
     this.dateSelect.trigger('change');
   },
   

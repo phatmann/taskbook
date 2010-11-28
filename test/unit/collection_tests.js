@@ -27,11 +27,11 @@ $(function() {
     }
   });
   
-  test('Can init blank collection', function() {
+  test('Init blank collection', function() {
     var collection2 = new Collection();
   });
   
-  test('Should save collection to storage' , function() {
+  test('Save collection to storage' , function() {
     expect(2);
     collection.save();
     var stored = JSON.parse(window.localStorage['collection_test']);
@@ -40,7 +40,7 @@ $(function() {
   });
   
   
-  test('Should load collection from storage' , function() {
+  test('Load collection from storage' , function() {
   	expect(3);
   	collection.save();
   	var collection2 = new Collection({collectionID:'test'});
@@ -51,39 +51,39 @@ $(function() {
   	ok(collection2 == collection2.items[0].collection, 'First item refers to collection');
   });
   
-  test('Should auto-assign item ID', function() {
+  test('Auto-assign item ID', function() {
     equal(2, collection.items[1].itemID, 'Second item ID should be 2');
   });
   
-  test('Should get item', function() {
+  test('Get item', function() {
     expect(2);
     var item = collection.items[0];
     equal(collection.get(item.itemID).itemID, item.itemID, 'ID of fetched item');
     ok(collection == item.collection, 'Fetched item refers to collection');
   });
   
-  test('Should group by a property', function() {
+  test('Group by a property', function() {
     expect(2);
     var group = collection.group('prop1', '2010-01-01');
     equal(group.length, 2, 'Items in group');
     ok(group.indexOf(collection.items[0]) != -1, 'First item is in group');
   });
   
-  test('Should group by a second property', function() {
+  test('Group by a second property', function() {
     expect(2);
     var group = collection.group('prop2', '2010-04-01');
     equal(group.length, 1, 'Items in group');
     ok(group.indexOf(collection.items[1]) != -1, 'Second item is in group');
   });
   
-  test('Should return groups', function() {
+  test('Return groups', function() {
     expect(2);
     var groups = collection.groups('prop1');
     equal(2, groups.length);
     equal('2010-01-01', groups[0]);
   });
   
-  test('Should remove item from collection and group', function() {
+  test('Remove item from collection and group', function() {
     expect(4);
     var item = collection.items[1];
     collection.remove(item);
@@ -95,7 +95,7 @@ $(function() {
     ok(group.indexOf(item) == -1, 'Item is not in group');
   });
   
-  test('Should create an item with properties', function() {
+  test('Create an item with properties', function() {
     expect(1);
     var t = new TestItem({name:'name'});
     equal('name', t.name);

@@ -29,12 +29,23 @@ $(function() {
     ok(grouping.entries['x'][0] == obj, 'Object in group');
   });
 
-  test('Remove from grouping' , function(){
+  test('Remove item from grouping' , function(){
+  	expect(1);
+  	var grouping = new Grouping('prop');
+  	var obj1 = {prop: 'x'};
+  	var obj2 = {prop: 'x'};
+  	grouping.add(obj1);
+  	grouping.add(obj2);
+  	grouping.remove(obj1);
+    equal(1, grouping.entries['x'].length, 'Item removed');
+  });
+  
+  test('Remove last item from grouping' , function(){
   	expect(1);
   	var grouping = new Grouping('prop');
   	var obj = {prop: 'x'};
   	grouping.add(obj);
   	grouping.remove(obj);
-    equal(grouping.entries['x'].length, 0, 'Tasks in group');
+    equal(null, grouping.entries['x'], 'Group deleted');
   });
 });
