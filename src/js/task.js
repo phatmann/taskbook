@@ -1,14 +1,13 @@
-/*global YMD */
+/*global subclass Collection YMD */
 
 var DUE_DATE_DAYS_AHEAD = 30;
 
 // TODO: move common functionality to ModelItem class
 
 function Task(attrs) {
-  this.book = null;
-  this.itemType = 'Task';
+  Task.baseConstructor.call(this, 'Task');
   
-  if (typeof attrs == 'string') {
+  if (typeof attrs === 'string') {
     attrs = {goal:attrs};
   }
   
@@ -39,13 +38,9 @@ function Task(attrs) {
   }
 }
 
+subclass(Task, Collection.Item);
+
 Task.prototype = { 
-  setProperty: function(property, value) {
-    this.book.beforeTaskChanged(this, property);
-    this[property] = value;
-    this.book.taskChanged(this, property);
-  },
-  
   toggleComplete: function() {
     if (this.completionDate === null) {
       this.setProperty('completionDate', new YMD.now());

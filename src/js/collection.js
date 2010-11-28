@@ -114,7 +114,9 @@ Collection.prototype = {
             // Revive item pseudo-classes
             var type = value.itemType;
             if (type && typeof type === 'string' && typeof window[type] === 'function') {
-                return new window[type](value);
+                var item = new window[type](value);
+                item.collection = this;
+                return item;
             }
         }
         return value;
@@ -163,6 +165,7 @@ Collection.prototype = {
       this.groupings[grouping].remove(item);
     }
     
+    item.collection = null;
     $(this).trigger('change', {items: this.items});
   },
 
@@ -202,3 +205,17 @@ Collection.prototype = {
     $(this).trigger('itemChange', item);
   }
 };
+
+Collection.Item = function(itemType) {
+  this.collection = null;
+  this.itemType   = itemType;
+};
+
+Collection.Item.prototype = {
+  setProperty: function(property, value) {
+    this.collection.beforeItemChanged(this, property);
+    this[property] = value;
+    this.collection.itemChanged(this, property);
+  }
+};
+  
