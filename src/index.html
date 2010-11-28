@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TaskBook</title>
+    <link type="text/css" rel="stylesheet" media="all" href="css/taskbook.css" /> 
+    <link type="text/css" rel="stylesheet" media="all" href="css/jquery-ui/themes/ui-lightness/jquery-ui.css" /> 
+    <script type="text/javascript" src="js/jquery/jquery.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/collection.js"></script>
+    <script type="text/javascript" src="js/task.js"></script>
+    <script type="text/javascript" src="js/view.js"></script>
+    <script type="text/javascript" src="js/book.js"></script>
+    <script type="text/javascript" src="js/controller.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+  </head>
+  
+  <body>
+    <div id="content">
+      
+      <div id="leftCol">
+        <textarea id="taskGoalField" type="text"></textarea>
+        <button id="addButton">Add</button>
+        <table id="taskList">
+          <tr class="task template">
+            <td class="startDate"></td>
+            <td class="goal"></td>
+            <td class="dueDate"></td>
+          </tr>
+        </table>
+      </div>
+    
+      <div id="rightCol">
+        <div id="currentDate">
+          <button id="prevDateButton">&lt;</button>
+          <select id="dateSelect">
+            <option class="dateOption template"></option>
+          </select>
+          <button id="nextDateButton">&gt;</button>
+        </div>
+        
+        <div id="actions">
+          <h3>Actions</h3>
+          <table id="actionList">
+            <tr class="task template">
+              <td class="goal"></td>
+            </tr>
+          </table>
+        </div>
+        
+        <div id="dueTasks">
+          <h3>Due</h3>
+          <table id="dueTaskList">
+            <tr class="task template">
+              <td class="goal"></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  
+    <div id="taskPopup">
+      <span class="startDate"></span>
+      <button id="completedButton"></button>
+      <button id="deleteButton">Delete</button>
+      <span class="dueDate"></span>
+    </div>
+    
+    <div id="calendarPopup"></div>
+        
+    <textarea id="taskDump"></textarea>
+    <button id="loadButton">Load</button>
+  </body>
+</html>

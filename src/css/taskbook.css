@@ -1,0 +1,73 @@
+body {
+  font-size: 10pt;
+}
+
+#content {
+  width: 100%;
+  overflow: hidden;
+}
+
+.task {
+  cursor: pointer;
+  font-size: 12pt;
+}
+
+.task .goal:hover {
+  text-decoration: underline;
+}
+
+.startDate, .dueDate {
+  font-size: 7pt;
+  cursor: pointer;
+}
+
+#leftCol {
+  float:left;
+  width: 40%;
+}
+
+#rightCol {
+  float:left;
+  width: 50%;
+  overflow: hidden;
+}
+
+#taskGoalField {
+  resize: none;
+  height: 1.5em;
+}
+
+#taskDump {
+  margin-top: 50px;
+  height: 100px;
+  width: 400px;
+}
+
+#taskPopup {
+  display: none;
+  position: absolute;
+  background-color: white;
+  border: solid 1px gray;
+}
+
+#calendarPopup {
+  display: none;
+  position: absolute;
+}
+
+.completed {
+  text-decoration: line-through;
+}
+
+.selected {
+  background-color: #cccccc;
+}
+
+.dateField {
+  width: 75px;
+}
+
+#actions, #dueTasks {
+  float: left;
+  width: 50%;
+}
