@@ -55,6 +55,7 @@ YMD.now = function() {
 };
 
 // TODO: use a singleton Date object
+// TODO: YMD usage is still awkward. Need to improve this.
 
 YMD.prototype = {
   toString: function(format) {
@@ -75,3 +76,24 @@ YMD.prototype = {
     return new YMD(d);
   }
 };
+
+/*** Event ***/
+// From http://www.alexatnet.com/content/model-view-controller-mvc-javascript
+
+var Event = function(sender) {
+    this.sender    = sender;
+    this.listeners = [];
+};
+ 
+Event.prototype = {
+    attach: function(listener) {
+        this.listeners.push(listener);
+    },
+    
+    notify: function(args) {
+        for (var i = 0; i < this.listeners.length; i++) {
+            this.listeners[i](this.sender, args);
+        }
+    }
+};
+

@@ -48,8 +48,8 @@ View.prototype = {
     
     // TODO: code below should be in subclass
     
-    if (item._id) {
-      row.attr('value', item._id);
+    if (item.itemID) {
+      row.attr('value', item.itemID);
     }
     
     row.toggleClass('completed', item.completionDate !== null);
@@ -100,6 +100,7 @@ $.extend(TasksView.prototype, {
     self.taskGoalField.keydown(function(e) {
       if (e.which == 13) {
         self.addButtonClick();
+        return false;
       }
     });
   
@@ -117,11 +118,11 @@ $.extend(TasksView.prototype, {
       return false;
     });
   
-    $(self.controller.book).bind('change', function(e, props){
+    self.controller.book.changedEvent.attach(function(props){
       self.bookChange(props);
     });
   
-    $(self.controller.book).bind('taskChange', function(e, task){
+    self.controller.book.itemChangedEvent.attach(function(task){
       self.taskChange(task);
     });
     
@@ -144,7 +145,7 @@ $.extend(TasksView.prototype, {
       this.fillDueTasks();
     }
     
-    if (props.tasks) {
+    if (props.items) {
       this.fillTaskList();
       
       // TODO: only update these when changed
@@ -153,7 +154,7 @@ $.extend(TasksView.prototype, {
   },
   
   taskChange: function(task) {
-    var taskRows = $('[value=' + task._id + ']');
+    var taskRows = $('[value=' + task.itemID + ']');
     var self = this;
     
     taskRows.each(function() {
@@ -222,7 +223,7 @@ $.extend(TasksView.prototype, {
   
   fillTaskList: function() {
     this.fillList(this.taskList, this.controller.book.all());
-    $('#taskDump').val(window.localStorage['taskbook_default']);
+    $('#taskDump').val(window.localStorage['collection_taskbook_default']);
   },
   
   fillDateSelect: function() {

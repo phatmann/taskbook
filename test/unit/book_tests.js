@@ -9,7 +9,9 @@ $(function() {
     }
   });
   
-  test('Can create TaskBook', function() {
+  test('Should add task', function() {
+    book.add(new Task('goal'));
+    equal(1, book.all().length);
   });
   
   // test('Active dates', function() {

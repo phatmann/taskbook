@@ -1,4 +1,4 @@
-/*global subclass */
+/*global subclass Event */
 
 function Index(property) {
   this.entries  = {};
@@ -92,6 +92,9 @@ Collection.prototype = {
     this.collectionID   = props.collectionID || "default";
     this.idIndex        = new Index('itemID');
     this.groupings      = {};
+    
+    this.changedEvent        = new Event(this);
+    this.itemChangedEvent    = new Event(this);
   
     if (!this.nextItemID) {
        if (this.items && this.items.length > 0) {
@@ -111,17 +114,15 @@ Collection.prototype = {
   
   load: function() {
     var storedCollection = window.localStorage['collection_' + this.collectionID];
-
+    var self = this;
+    
     if (storedCollection) {
       storedCollection = JSON.parse(storedCollection, function(key, value) {
-        if (value && typeof value === 'object') {
-            // Revive item pseudo-classes
-            var type = value.itemType;
-            if (type && typeof type === 'string' && typeof window[type] === 'function') {
-                var item = new window[type](value);
-                item.collection = this;
-                return item;
-            }
+        if (value && typeof value === 'object' && value.itemType) {
+            // Revive item classes
+            var item = new window[value.itemType](value);
+            item.collection = self;
+            return item;
         }
         return value;
       });
@@ -132,7 +133,8 @@ Collection.prototype = {
   
   save: function() {
     var stored_collection = JSON.stringify(this, function(key, value) {
-      if (['collection', 'groupings', 'idIndex'].indexOf(key) != -1) {
+      // TODO: awkward
+      if (['collection', 'groupings', 'idIndex', 'changedEvent', 'itemChangedEvent'].indexOf(key) != -1) {
         return undefined;
       } else {
         return value;
@@ -158,7 +160,7 @@ Collection.prototype = {
       this.groupings[grouping].add(item);
     }
     
-    $(this).trigger('change', {items: this.items}); // TODO: avoid this overhead on load
+    this.changedEvent.notify({items: this.items}); // TODO: avoid this overhead on load
   },
   
   remove: function(item) {
@@ -170,7 +172,7 @@ Collection.prototype = {
     }
     
     item.collection = null;
-    $(this).trigger('change', {items: this.items});
+    this.changedEvent.notify({items: this.items});
   },
 
   get: function(id) {
@@ -214,13 +216,14 @@ Collection.prototype = {
       grouping.add(item);
     }
     
-    $(this).trigger('itemChange', item);
+    this.itemChangedEvent.notify(item);
   }
 };
 
-Collection.Item = function(itemType) {
+Collection.Item = function(itemType, attrs) {
   this.collection = null;
   this.itemType   = itemType;
+  this.itemID     = attrs ? attrs.itemID : null;
 };
 
 Collection.Item.prototype = {

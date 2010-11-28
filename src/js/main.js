@@ -1,7 +1,7 @@
 /*global TaskBook TasksView TasksController */
 
 $(function(){
-  var book = new TaskBook('default', ['startDate', 'dueDate']);
+  var book = new TaskBook('default');
   book.load();
   
   var controller = new TasksController(book);

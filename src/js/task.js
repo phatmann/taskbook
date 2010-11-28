@@ -5,14 +5,13 @@ var DUE_DATE_DAYS_AHEAD = 30;
 // TODO: move common functionality to ModelItem class
 
 function Task(attrs) {
-  Task.baseConstructor.call(this, 'Task');
-  
   if (typeof attrs === 'string') {
     attrs = {goal:attrs};
   }
   
+  Task.baseConstructor.call(this, 'Task', attrs);
+  
   this.goal             = attrs.goal;
-  this.itemID           = attrs.itemID;
   this.completionDate   = null;
   
   if (attrs.createDate) {

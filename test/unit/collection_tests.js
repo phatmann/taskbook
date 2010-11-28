@@ -43,11 +43,12 @@ $(function() {
   test('Should load collection from storage' , function() {
   	expect(3);
   	collection.save();
-  	var collection2 = new Collection('test');
+  	var collection2 = new Collection({collectionID:'test'});
   	collection2.load();
-  	equal(collection2.items.length, collection.items.length, 'Items in collection2');
-  	ok(collection.items[0].name == collection2.items[0].name, 'First item was loaded correctly');
-  	ok(collection == collection.items[0].collection, 'First item refers to collection');
+  	console.log(collection2.items);
+  	equal(collection2.items.length, collection.items.length, 'Items in loaded collection');
+  	equal(collection2.items[0].name, collection.items[0].name, 'First item was loaded correctly');
+  	ok(collection2 == collection2.items[0].collection, 'First item refers to collection');
   });
   
   test('Should auto-assign item ID', function() {
@@ -85,5 +86,11 @@ $(function() {
     var group = collection.group('prop1', '2010-04-01');
     equal(group.length, 0, 'Items in group');
     ok(group.indexOf(item) == -1, 'Item is not in group');
+  });
+  
+  test('Should create an item with properties', function() {
+    expect(1);
+    var t = new TestItem({name:'name'});
+    equal('name', t.name);
   });
 });

@@ -14,8 +14,7 @@ TasksController.prototype = {
     }
     
     for (var i = 0; i < goals.length; ++i) {
-      var t = new Task(goals[i]);
-      this.book.add(t);
+      this.book.add(new Task({goal:goals[i]}));
     }
     
     this.book.save();
@@ -36,7 +35,7 @@ TasksController.prototype = {
   },
   
   loadFromDump: function(dump) {
-    window.localStorage['taskbook_default'] = dump;
+    window.localStorage['collection_taskbook_default'] = dump;
     this.book.load();
   },
   
