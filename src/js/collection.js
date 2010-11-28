@@ -38,6 +38,7 @@ Index.prototype = {
 
 function Grouping(property) {
   Grouping.baseConstructor.call(this, property);
+  this.event = {groupChanged: new Event(this), groupAdded: new Event(this), groupRemoved: new Event(this)};
 }
 
 subclass(Grouping, Index);
@@ -88,13 +89,8 @@ function Collection(props) {
   this.idIndex        = new Index('itemID');
   this.groupings      = {};
   this.meta           = {};
-  this.event          = {};
   
-  var events = ['itemAdded', 'itemRemoved', 'itemChanged', 'metadataChanged'];
-  
-  for (var i = 0; i < events.length; ++i) {
-    this.event[events[i]] = new Event(this);
-  }
+  Event.map(this, ['itemAdded', 'itemRemoved', 'itemChanged', 'metadataChanged']);
 
   if (!this.nextItemID) {
      if (this.items && this.items.length > 0) {
@@ -105,7 +101,7 @@ function Collection(props) {
   }
 
   if (props.groupings) {
-    for (i= 0; i < props.groupings.length; ++i) {
+    for (var i= 0; i < props.groupings.length; ++i) {
       var grouping = props.groupings[i];
       this.groupings[grouping] = new Grouping(grouping);
     }
@@ -147,7 +143,7 @@ Collection.prototype = {
       
       // TODO: cache groupings?
       for (var i = 0; i < stored.items.length; ++i) {
-        this.add(stored.items[i]); 
+        this.add(stored.items[i], true); 
       }
     }
   },
@@ -157,7 +153,7 @@ Collection.prototype = {
     this.event.metadataChanged.notify();
   },
   
-  add: function(item) {
+  add: function(item, suppressNotify) {
     item.collection   = this;
     item.itemID       = this.nextItemID++;
     
@@ -168,10 +164,12 @@ Collection.prototype = {
       this.groupings[grouping].add(item);
     }
     
-    this.event.itemAdded.notify(item); // TODO: avoid this overhead on load
+    if (!suppressNotify) { 
+      this.event.itemAdded.notify(item);
+    }
   },
   
-  remove: function(item) {
+  remove: function(item, suppressNotify) {
     this.items.splice(this.items.indexOf(item), 1);
     this.idIndex.remove(item);
     
@@ -180,7 +178,10 @@ Collection.prototype = {
     }
     
     item.collection = null;
-    this.event.itemRemoved.notify(item);
+    
+    if (!suppressNotify) { 
+      this.event.itemRemoved.notify(item);
+    }
   },
 
   get: function(id) {

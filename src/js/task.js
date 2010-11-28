@@ -2,8 +2,6 @@
 
 var DUE_DATE_DAYS_AHEAD = 30;
 
-// TODO: move common functionality to ModelItem class
-
 function Task(attrs) {
   if (typeof attrs === 'string') {
     attrs = {goal:attrs};
@@ -39,7 +37,7 @@ function Task(attrs) {
 
 subclass(Task, Collection.Item);
 
-Task.prototype = { 
+$.extend(Task.prototype, { 
   toggleComplete: function() {
     if (this.completionDate === null) {
       this.setProperty('completionDate', new YMD.now());
@@ -47,4 +45,4 @@ Task.prototype = {
       this.setProperty('completionDate', null);
     }
   }
-};
+});

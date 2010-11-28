@@ -78,22 +78,30 @@ YMD.prototype = {
 };
 
 /*** Event ***/
-// From http://www.alexatnet.com/content/model-view-controller-mvc-javascript
+// Based on code posted at http://www.alexatnet.com/content/model-view-controller-mvc-javascript
 
 var Event = function(sender) {
-    this.sender    = sender;
-    this.listeners = [];
+  this.sender    = sender;
+  this.listeners = [];
+};
+
+Event.map = function(sender, events) {
+  sender.event = {};
+  
+  for (var i = 0; i < events.length; ++i) {
+    sender.event[events[i]] = new Event(sender);
+  }
 };
  
 Event.prototype = {
-    attach: function(listener) {
-        this.listeners.push(listener);
-    },
-    
-    notify: function(args) {
-        for (var i = 0; i < this.listeners.length; i++) {
-            this.listeners[i](this.sender, args);
-        }
+  attach: function(listener) {
+    this.listeners.push(listener);
+  },
+  
+  notify: function(args) {
+    for (var i = 0; i < this.listeners.length; i++) {
+      this.listeners[i](this.sender, args);
     }
+  }
 };
 

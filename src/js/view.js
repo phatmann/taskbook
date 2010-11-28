@@ -118,19 +118,19 @@ $.extend(TasksView.prototype, {
       return false;
     });
   
-    self.controller.book.event.metadataChanged.attach(function(props){
-      self.currentDateChange(props);
+    self.controller.book.event.metadataChanged.attach(function(book){
+      self.currentDateChange();
     });
     
-    self.controller.book.event.itemAdded.attach(function(props){
-      self.bookChange(props);
+    self.controller.book.event.itemAdded.attach(function(book, item){
+      self.bookChange();
     });
     
-    self.controller.book.event.itemRemoved.attach(function(props){
-      self.bookChange(props);
+    self.controller.book.event.itemRemoved.attach(function(book, item){
+      self.bookChange();
     });
   
-    self.controller.book.event.itemChanged.attach(function(task){
+    self.controller.book.event.itemChanged.attach(function(book, task){
       self.taskChange(task);
     });
     
@@ -216,6 +216,7 @@ $.extend(TasksView.prototype, {
     var task = this.calendarPopup.data('task');
     var property = this.calendarPopup.data('property');
     this.toggleCalendarPopup();
+    console.log(task);
     task.setProperty(property, date);
   },
   
