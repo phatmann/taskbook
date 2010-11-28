@@ -118,11 +118,19 @@ $.extend(TasksView.prototype, {
       return false;
     });
   
-    self.controller.book.changedEvent.attach(function(props){
+    self.controller.book.event.metadataChanged.attach(function(props){
+      self.currentDateChange(props);
+    });
+    
+    self.controller.book.event.itemAdded.attach(function(props){
+      self.bookChange(props);
+    });
+    
+    self.controller.book.event.itemRemoved.attach(function(props){
       self.bookChange(props);
     });
   
-    self.controller.book.itemChangedEvent.attach(function(task){
+    self.controller.book.event.itemChanged.attach(function(task){
       self.taskChange(task);
     });
     
@@ -140,17 +148,13 @@ $.extend(TasksView.prototype, {
   },
   
   bookChange: function(props) {
-    if (props.currentDate) {
-      this.fillActions();
-      this.fillDueTasks();
-    }
+    this.fillTaskList();
+    this.fillDateSelect(); // TODO: only update these when changed
+  },
     
-    if (props.items) {
-      this.fillTaskList();
-      
-      // TODO: only update these when changed
-      this.fillDateSelect();
-    }
+  currentDateChange: function(props) {
+    this.fillActions();
+    this.fillDueTasks();
   },
   
   taskChange: function(task) {
@@ -232,11 +236,11 @@ $.extend(TasksView.prototype, {
   },
   
   fillActions: function() {
-    this.fillList(this.actionList, this.controller.book.group('startDate', this.controller.book.currentDate));
+    this.fillList(this.actionList, this.controller.book.group('startDate', this.controller.book.currentDate()));
   },
   
   fillDueTasks: function() {
-    this.fillList(this.dueTaskList, this.controller.book.group('dueDate', this.controller.book.currentDate));
+    this.fillList(this.dueTaskList, this.controller.book.group('dueDate', this.controller.book.currentDate()));
   },
   
   selectedDate: function() {

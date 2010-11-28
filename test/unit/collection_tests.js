@@ -76,6 +76,13 @@ $(function() {
     ok(group.indexOf(collection.items[1]) != -1, 'Second item is in group');
   });
   
+  test('Should return groups', function() {
+    expect(2);
+    var groups = collection.groups('prop1');
+    equal(2, groups.length);
+    equal('2010-01-01', groups[0]);
+  });
+  
   test('Should remove item from collection and group', function() {
     expect(4);
     var item = collection.items[1];

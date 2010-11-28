@@ -21,7 +21,7 @@ TasksController.prototype = {
   },
   
   setCurrentDate: function(date) {
-    this.book.update({currentDate: date});
+    this.book.currentDate(date);
     this.book.save();
   },
   
@@ -42,9 +42,9 @@ TasksController.prototype = {
   activeDates: function() {
     // TODO: update incrementally
     
-    if (!this.dateGroups) {
+    //if (!this.dateGroups) {
       this.dateGroups = this.book.groups('startDate').concat(this.book.groups('dueDate')).unique().sort();
-    }
+    //}
     
     return this.dateGroups;
   }

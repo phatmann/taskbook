@@ -79,45 +79,60 @@ $.extend(Grouping.prototype, {
 });
 
 function Collection(props) {
-  this.init(props);
+  if (!props) {
+    props = {};
+  }
+  
+  this.items          = props.items || [];
+  this.collectionID   = props.collectionID || "default";
+  this.idIndex        = new Index('itemID');
+  this.groupings      = {};
+  this.meta           = {};
+  this.event          = {};
+  
+  var events = ['itemAdded', 'itemRemoved', 'itemChanged', 'metadataChanged'];
+  
+  for (var i = 0; i < events.length; ++i) {
+    this.event[events[i]] = new Event(this);
+  }
+
+  if (!this.nextItemID) {
+     if (this.items && this.items.length > 0) {
+       this.nextItemID  = this.items[this.items.length - 1].itemID + 1;
+     } else {
+       this.nextItemID = 1;
+     }
+  }
+
+  if (props.groupings) {
+    for (i= 0; i < props.groupings.length; ++i) {
+      var grouping = props.groupings[i];
+      this.groupings[grouping] = new Grouping(grouping);
+    }
+  }
 }
 
 Collection.prototype = {
-  init: function(props) {
-    if (!props) {
-      props = {};
-    }
+  save: function() {
+    var stored = {items: this.items, meta: this.meta};
     
-    this.items          = props.items || [];
-    this.collectionID   = props.collectionID || "default";
-    this.idIndex        = new Index('itemID');
-    this.groupings      = {};
-    
-    this.changedEvent        = new Event(this);
-    this.itemChangedEvent    = new Event(this);
-  
-    if (!this.nextItemID) {
-       if (this.items && this.items.length > 0) {
-         this.nextItemID  = this.items[this.items.length - 1].itemID + 1;
-       } else {
-         this.nextItemID = 1;
-       }
-    }
-  
-    if (props.groupings) {
-      for (var i= 0; i < props.groupings.length; ++i) {
-        var grouping = props.groupings[i];
-        this.groupings[grouping] = new Grouping(grouping);
+    stored = JSON.stringify(stored, function(key, value) {
+      if (key == 'collection') {
+        return undefined;
+      } else {
+        return value;
       }
-    }
+    });
+    
+    window.localStorage['collection_' + this.collectionID] = stored;
   },
   
   load: function() {
-    var storedCollection = window.localStorage['collection_' + this.collectionID];
-    var self = this;
+    var stored = window.localStorage['collection_' + this.collectionID];
     
-    if (storedCollection) {
-      storedCollection = JSON.parse(storedCollection, function(key, value) {
+    if (stored) {
+      var self = this;
+      stored = JSON.parse(stored, function(key, value) {
         if (value && typeof value === 'object' && value.itemType) {
             // Revive item classes
             var item = new window[value.itemType](value);
@@ -126,27 +141,20 @@ Collection.prototype = {
         }
         return value;
       });
-    }
-    
-    this.init(storedCollection);
-  },
-  
-  save: function() {
-    var stored_collection = JSON.stringify(this, function(key, value) {
-      // TODO: awkward
-      if (['collection', 'groupings', 'idIndex', 'changedEvent', 'itemChangedEvent'].indexOf(key) != -1) {
-        return undefined;
-      } else {
-        return value;
+      
+      this.meta  = stored.meta || {};
+      this.items = [];
+      
+      // TODO: cache groupings?
+      for (var i = 0; i < stored.items.length; ++i) {
+        this.add(stored.items[i]); 
       }
-    });
-    
-    window.localStorage['collection_' + this.collectionID] = stored_collection;
+    }
   },
   
-  update: function(props) {
-    $.extend(this, props);
-    $(this).trigger('change', props);
+  setMetadata: function(props) {
+    $.extend(this.meta, props);
+    this.event.metadataChanged.notify();
   },
   
   add: function(item) {
@@ -160,7 +168,7 @@ Collection.prototype = {
       this.groupings[grouping].add(item);
     }
     
-    this.changedEvent.notify({items: this.items}); // TODO: avoid this overhead on load
+    this.event.itemAdded.notify(item); // TODO: avoid this overhead on load
   },
   
   remove: function(item) {
@@ -172,7 +180,7 @@ Collection.prototype = {
     }
     
     item.collection = null;
-    this.changedEvent.notify({items: this.items});
+    this.event.itemRemoved.notify(item);
   },
 
   get: function(id) {
@@ -216,7 +224,7 @@ Collection.prototype = {
       grouping.add(item);
     }
     
-    this.itemChangedEvent.notify(item);
+    this.event.itemChanged.notify(item);
   }
 };
 
