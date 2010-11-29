@@ -134,6 +134,30 @@ $.extend(TasksView.prototype, {
       self.taskChange(task);
     });
     
+    self.controller.book.grouping('startDate').event.groupAdded.attach(function(book, task){
+      self.fillDateSelect();
+    });
+    
+    self.controller.book.grouping('dueDate').event.groupAdded.attach(function(book, task){
+      self.fillDateSelect();
+    });
+    
+    self.controller.book.grouping('startDate').event.groupRemoved.attach(function(book, task){
+      self.fillDateSelect();
+    });
+    
+    self.controller.book.grouping('dueDate').event.groupRemoved.attach(function(book, task){
+      self.fillDateSelect();
+    });
+    
+    self.controller.book.grouping('startDate').event.groupChanged.attach(function(book, task){
+      self.fillActions();
+    });
+    
+    self.controller.book.grouping('dueDate').event.groupChanged.attach(function(book, task){
+      self.fillDueTasks();
+    });
+    
     $('#calendarPopup').datepicker({
       dateFormat: 'yy-m-d',
       onSelect: function(date) {
@@ -145,11 +169,12 @@ $.extend(TasksView.prototype, {
   render: function() {
     this.fillTaskList();
     this.fillDateSelect();
+    this.fillActions();
+    this.fillDueTasks();
   },
   
   bookChange: function(props) {
     this.fillTaskList();
-    this.fillDateSelect(); // TODO: only update these when changed
   },
     
   currentDateChange: function(props) {
@@ -216,7 +241,6 @@ $.extend(TasksView.prototype, {
     var task = this.calendarPopup.data('task');
     var property = this.calendarPopup.data('property');
     this.toggleCalendarPopup();
-    console.log(task);
     task.setProperty(property, date);
   },
   
@@ -233,7 +257,7 @@ $.extend(TasksView.prototype, {
   
   fillDateSelect: function() {
     this.fillList(this.dateSelect, this.controller.book.activeDates());
-    this.dateSelect.trigger('change');
+    this.dateSelect.val(this.controller.book.currentDate());
   },
   
   fillActions: function() {

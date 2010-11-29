@@ -62,10 +62,8 @@ $.extend(Grouping.prototype, {
   
   add: function(obj) {
     this.group(obj).push(obj);
-    this.event.groupChanged.notify(this.propertyKey(obj));
+    this.event.groupChanged.notify(obj[this.property]);
   },
-  
-  // TODO: test group removal
   
   remove: function(obj) {
     var key = this.propertyKey(obj);
@@ -203,17 +201,17 @@ Collection.prototype = {
     return this.items;
   },
   
+  grouping: function(property) {
+    return this.groupings[property];
+  },
+  
   group: function(property, value) {
-    return this.groupings[property].get(value);
+    return this.grouping(property).get(value);
   },
   
   groups: function(property) {
-    if (this.groupings) {
-      var grouping =  this.groupings[property];
-      
-      if (grouping) {
-        return grouping.groups();
-      }
+    if (this.grouping(property)) {
+      return this.grouping(property).groups();
     }
       
     return [];
