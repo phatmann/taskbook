@@ -71,3 +71,8 @@ body {
   float: left;
   width: 50%;
 }
+
+.hint {
+  color: #cccccc;
+  font-style: italic;
+}

@@ -84,6 +84,8 @@ View.prototype = {
 
 function TasksView(controller) {
   TasksView.baseConstructor.call(this, controller);
+  
+  $('input[title]').hint('hint');
   this.router();
 }
 
@@ -283,6 +285,10 @@ $.extend(TasksView.prototype, {
     
     this.taskPopup.find('.startDate').text(this.dateString(task.startDate));
     this.taskPopup.find('.dueDate').text(this.dateString(task.dueDate));
+    
+    if (task.action) {
+      this.taskPopup.find('.action').val(task.action);
+    }
   },
   
   // TODO: get toggleXXPopup methods to share code

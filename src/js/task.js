@@ -10,6 +10,7 @@ function Task(attrs) {
   Task.baseConstructor.call(this, 'Task', attrs);
   
   this.goal             = attrs.goal;
+  this.action           = attrs.action;
   this.completionDate   = null;
   
   if (attrs.createDate) {
