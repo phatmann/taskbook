@@ -74,6 +74,7 @@ $.extend(Grouping.prototype, {
   
       if (n != -1) {
         group.splice(n, 1);
+        this.event.groupChanged.notify(key);
         
         if (group.length === 0) {
           delete this.entries[key];
