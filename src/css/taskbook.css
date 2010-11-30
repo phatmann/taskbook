@@ -79,3 +79,14 @@ body {
   margin: 0.3em 0 0 0.5em;
   position: absolute;
 }
+
+.action_goal {
+  color: #aaaaaa;
+  font-size: .8em;
+  line-height: 1em;
+  margin: 0;
+}
+
+#actionList td {
+  padding: .2em 0;
+}

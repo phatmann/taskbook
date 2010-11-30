@@ -218,21 +218,25 @@ Collection.prototype = {
     return [];
   },
   
-  beforeItemChanged: function(item, property) {
-    var grouping = this.groupings[property];
+  beforeItemChanged: function(item, properties) {
+    for (var property in properties) {
+      var grouping = this.groupings[property];
     
-    if (grouping) {
-      grouping.remove(item);
+      if (grouping) {
+        grouping.remove(item);
+      }
     }
   },
   
-  itemChanged: function(item, property) {
+  itemChanged: function(item, properties) {
     this.save();
     
-    var grouping = this.groupings[property];
+    for (var property in properties) {
+      var grouping = this.groupings[property];
     
-    if (grouping) {
-      grouping.add(item);
+      if (grouping) {
+        grouping.add(item);
+      }
     }
     
     this.event.itemChanged.notify(item);
@@ -246,10 +250,14 @@ Collection.Item = function(itemType, attrs) {
 };
 
 Collection.Item.prototype = {
+  setProperties: function(properties) {
+    this.collection.beforeItemChanged(this, properties);
+    $.extend(this, properties);
+    this.collection.itemChanged(this, properties);
+  },
+  
   setProperty: function(property, value) {
-    this.collection.beforeItemChanged(this, property);
-    this[property] = value;
-    this.collection.itemChanged(this, property);
+    this.setProperties({property: value});
   }
 };
   

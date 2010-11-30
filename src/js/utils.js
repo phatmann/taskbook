@@ -46,7 +46,7 @@ $(function() {
     });
     
     $(this).blur(function() {
-      $('#input-prompt-' + i).toggle($(this).val() === '');
+      $('#input-prompt-' + i).css('display', $(this).val() === '' ? 'inline' : 'none');
     });
   });
 });

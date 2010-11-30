@@ -47,7 +47,12 @@ $.extend(Task.prototype, {
     }
   },
   
+  // TODO: handle this in view template
   displayString: function() {
-    return this.action || this.goal;
+    if (this.action) {
+      return this.action + '<p class="action_goal">' + this.goal + '</p>'; 
+    } else {
+      return this.goal;
+    }
   }
 });

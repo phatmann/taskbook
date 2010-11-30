@@ -112,6 +112,7 @@ $.extend(TasksView.prototype, {
   
     $('.task').live('click', function() {
       self.taskClick($(this));
+      return false;
     });
     
     $('.startDate, .dueDate').live('click', function() {
@@ -130,6 +131,10 @@ $.extend(TasksView.prototype, {
         return false;
       }
     });
+    
+    // $('body').click(function() {
+    //   self.dismissPopups();
+    // });
   
     self.controller.book.event.metadataChanged.attach(function(book){
       self.currentDateChange();
@@ -296,6 +301,10 @@ $.extend(TasksView.prototype, {
     
     this.taskPopup.find('.startDate').text(this.dateString(task.startDate));
     this.taskPopup.find('.dueDate').text(this.dateString(task.dueDate));
+    
+    this.taskPopup.find('.goal').val(task.goal);
+    this.taskPopup.find('.goal').blur();
+    
     this.taskPopup.find('.action').val(task.action ? task.action : null);
     this.taskPopup.find('.action').blur();
   },
@@ -305,18 +314,22 @@ $.extend(TasksView.prototype, {
   
   toggleTaskPopup: function(taskRow) {
     var task = this.taskPopup.data('task', task);
-    var elem = taskRow ? taskRow.find('.goal') : null;
+    var elem = taskRow ? taskRow.find('.displayString, .goal') : null;
     
     if (this.taskPopup.is(':visible')) {
       var oldElem = this.taskPopup.data('elem');
       oldElem.removeClass('selected');
       
       if (!taskRow || oldElem.equals(elem)) {
+        var properties = {};
         var taskAction = this.taskPopup.find('.action').val().trim();
         
         if (taskAction.length > 0 || task.action) {
-          task.setProperty('action', taskAction);
+          properties['action'] = taskAction;
         }
+        
+        properties['goal'] = this.taskPopup.find('.goal').val().trim();
+        task.setProperties(properties);
         
         this.taskPopup.slideUp("fast");
         return;
@@ -374,5 +387,15 @@ $.extend(TasksView.prototype, {
         top: elem.offset().top + elem.outerHeight() + 3 + "px"
       })
       .fadeIn("fast");
+  },
+  
+  dismissPopups: function() {
+    if (this.taskPopup.is(':visible')) {
+      this.toggleTaskPopup();
+    }
+    
+    if (this.calendarPopup.is(':visible')) {
+      this.toggleCalendarPopup();
+    }
   }
 });
