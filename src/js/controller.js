@@ -1,7 +1,7 @@
 /*global Task */
 
 function TasksController(book) {
-  this.book       = book;
+  this.book = book;
 }
 
 TasksController.prototype = {

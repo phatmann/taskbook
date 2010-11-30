@@ -20,6 +20,37 @@ Array.prototype.unique = function(transform) {
 	};
 })(jQuery);
 
+$(function() {
+  // Input prompts
+	// http://kyleschaeffer.com/best-practices/input-prompt-text/
+	$('input[title]').each(function(i){
+    $(this).addClass('input-prompt-' + i);
+    
+    var promptSpan = $('<span class="input-prompt"/>');
+    $(promptSpan).attr('id', 'input-prompt-' + i);
+    $(promptSpan).append($(this).attr('title'));
+    
+    $(promptSpan).click(function(){
+      $(this).hide();
+      $('.' + $(this).attr('id')).focus();
+    });
+    
+    if($(this).val() !== ''){
+      $(promptSpan).hide();
+    }
+    
+    $(this).before(promptSpan);
+    
+    $(this).focus(function(){
+      $('#input-prompt-' + i).hide();
+    });
+    
+    $(this).blur(function() {
+      $('#input-prompt-' + i).toggle($(this).val() === '');
+    });
+  });
+});
+
 // http://www.kevlindev.com/tutorials/javascript/inheritance/index.htm
 function subclass(subClass, baseClass) {
    function Inheritance() {}

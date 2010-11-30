@@ -45,5 +45,9 @@ $.extend(Task.prototype, {
     } else {
       this.setProperty('completionDate', null);
     }
+  },
+  
+  displayString: function() {
+    return this.action || this.goal;
   }
 });

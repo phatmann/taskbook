@@ -42,7 +42,13 @@ View.prototype = {
       var elem = row.find('.' + field);
     
       if (elem.length > 0) {
-        this.fillElement(elem, item[field]);
+        var value = item[field];
+        
+        if (typeof value == 'function') {
+          value = value.call(item);
+        }
+        
+        this.fillElement(elem, value);
       }
     }
     
@@ -84,8 +90,6 @@ View.prototype = {
 
 function TasksView(controller) {
   TasksView.baseConstructor.call(this, controller);
-  
-  $('input[title]').hint('hint');
   this.router();
 }
 
@@ -118,6 +122,13 @@ $.extend(TasksView.prototype, {
     self.taskDump.click(function() {
       this.select();
       return false;
+    });
+    
+    self.taskPopup.keydown(function(e) {
+      if (e.which == 13) {
+        self.toggleTaskPopup();
+        return false;
+      }
     });
   
     self.controller.book.event.metadataChanged.attach(function(book){
@@ -285,16 +296,15 @@ $.extend(TasksView.prototype, {
     
     this.taskPopup.find('.startDate').text(this.dateString(task.startDate));
     this.taskPopup.find('.dueDate').text(this.dateString(task.dueDate));
-    
-    if (task.action) {
-      this.taskPopup.find('.action').val(task.action);
-    }
+    this.taskPopup.find('.action').val(task.action ? task.action : null);
+    this.taskPopup.find('.action').blur();
   },
   
   // TODO: get toggleXXPopup methods to share code
   // TODO: use data-task attribute instead of value for all taskRows
   
   toggleTaskPopup: function(taskRow) {
+    var task = this.taskPopup.data('task', task);
     var elem = taskRow ? taskRow.find('.goal') : null;
     
     if (this.taskPopup.is(':visible')) {
@@ -302,6 +312,12 @@ $.extend(TasksView.prototype, {
       oldElem.removeClass('selected');
       
       if (!taskRow || oldElem.equals(elem)) {
+        var taskAction = this.taskPopup.find('.action').val().trim();
+        
+        if (taskAction.length > 0 || task.action) {
+          task.setProperty('action', taskAction);
+        }
+        
         this.taskPopup.slideUp("fast");
         return;
       }
@@ -309,7 +325,7 @@ $.extend(TasksView.prototype, {
     
     var showDates = taskRow.find('.startDate').length === 0;
     var taskID = taskRow.attr('value');
-    var task   = this.controller.book.get(taskID);
+    task = this.controller.book.get(taskID);
     
     this.fillTaskPopup(task);
     elem.addClass('selected');
