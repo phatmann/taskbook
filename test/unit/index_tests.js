@@ -25,8 +25,8 @@ $(function() {
   	var grouping = new Grouping('prop');
   	var obj = {prop: 'x'};
   	grouping.add(obj);
-  	equal(grouping.entries['x'].length, 1, 'Tasks in group');
-    ok(grouping.entries['x'][0] == obj, 'Object in group');
+  	equal(grouping.entries['x'].size(), 1, 'Tasks in group');
+    ok(grouping.entries['x'].items[0] == obj, 'Object in group');
   });
 
   test('Remove item from grouping' , function(){
@@ -37,7 +37,7 @@ $(function() {
   	grouping.add(obj1);
   	grouping.add(obj2);
   	grouping.remove(obj1);
-    equal(1, grouping.entries['x'].length, 'Item removed');
+    equal(1, grouping.entries['x'].size(), 'Item removed');
   });
   
   test('Remove last item from grouping' , function(){

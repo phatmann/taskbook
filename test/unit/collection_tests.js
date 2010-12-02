@@ -65,15 +65,15 @@ $(function() {
   test('Group by a property', function() {
     expect(2);
     var group = collection.group('prop1', '2010-01-01');
-    equal(group.length, 2, 'Items in group');
-    ok(group.indexOf(collection.items[0]) != -1, 'First item is in group');
+    equal(group.size(), 2, 'Items in group');
+    ok(group.items.indexOf(collection.items[0]) != -1, 'First item is in group');
   });
   
   test('Group by a second property', function() {
     expect(2);
     var group = collection.group('prop2', '2010-04-01');
-    equal(group.length, 1, 'Items in group');
-    ok(group.indexOf(collection.items[1]) != -1, 'Second item is in group');
+    equal(group.size(), 1, 'Items in group');
+    ok(group.items.indexOf(collection.items[1]) != -1, 'Second item is in group');
   });
   
   test('Return groups', function() {
@@ -84,15 +84,14 @@ $(function() {
   });
   
   test('Remove item from collection and group', function() {
-    expect(4);
+    expect(3);
     var item = collection.items[1];
     collection.remove(item);
     equal(2, collection.items.length, 'Items');
     ok(collection.items.indexOf(item) == -1, 'Items array does not include removed item');
     
     var group = collection.group('prop1', '2010-04-01');
-    equal(group.length, 0, 'Items in group');
-    ok(group.indexOf(item) == -1, 'Item is not in group');
+    ok(!group, 'Group was deleted');
   });
   
   test('Create an item with properties', function() {

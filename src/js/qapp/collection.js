@@ -6,10 +6,7 @@ function Collection(props) {
   }
   
   this.items          = props.items || [];
-  this.collectionID   = props.collectionID;
-  this.meta           = {};
-  
-  
+  this.collectionID   = props.collectionID;  
 }
 
 Collection.prototype = {
@@ -69,16 +66,36 @@ Collection.prototype = {
   },
   
   remove: function(item, suppressNotify) {
-    this.items.splice(this.items.indexOf(item), 1);
+    var index = this.items.indexOf(item);
+    
+    if (index === -1) {
+      return false;
+    }
+    
+    this.items.splice(index, 1);
     
     if (!suppressNotify) { 
       this.event.itemRemoved.notify(item);
     }
+    
+    return true;
   },
   
-  setMetadata: function(props) {
-    $.extend(this.meta, props);
-    this.event.metadataChanged.notify();
+  size: function() {
+    return this.items.length;
+  },
+  
+  metadata: function(props) {
+    if (!this._metadata) {
+      this._metadata = {};
+    }
+    
+    if (props) {
+      $.extend(this._metadata, props);
+      this.event.metadataChanged.notify();
+    }
+    
+    return this._metadata;
   }
 };
 
@@ -139,14 +156,14 @@ $.extend(IndexedCollection.prototype, {
   add: function(item, suppressNotify) {
     item.collection   = this;
     item.itemID       = this.nextItemID++;
-    Collection.prototype.add.call(this, item, suppressNotify);
+    IndexedCollection.superClass.add.call(this, item, suppressNotify);
     this.idIndex.add(item);
   },
   
   remove: function(item, suppressNotify) {
     this.idIndex.remove(item);
     item.collection = null;
-    Collection.prototype.remove.call(this, item, suppressNotify);
+    return IndexedCollection.superClass.remove.call(this, item, suppressNotify);
   },
 
   get: function(id) {
@@ -173,27 +190,21 @@ function Grouping(property) {
 }
 
 subclass(Grouping, Index);
-
-// TODO: use base class methods to modify entries array
     
 $.extend(Grouping.prototype, {
-  group: function(obj) {
+  groups: Grouping.superClass.keys,
+  
+  add: function(obj) {
     var key = this.propertyKey(obj);
     var group = this.entries[key];
     
     if (!group) {
-      group = this.entries[key] = [];
+      group = this.entries[key] = new Collection();
       this.event.groupAdded.notify(key);
     }
     
-    return group;
-  },
-  
-  groups: Index.prototype.keys,
-  
-  add: function(obj) {
-    this.group(obj).push(obj);
-    this.event.groupChanged.notify(obj[this.property]);
+    group.add(obj);
+    this.event.groupChanged.notify(key);
   },
   
   remove: function(obj) {
@@ -201,22 +212,17 @@ $.extend(Grouping.prototype, {
     var group = this.entries[key];
       
     if (group) {
-      var n = group.indexOf(obj);
+      var wasRemoved = group.remove(obj);
   
-      if (n != -1) {
-        group.splice(n, 1);
+      if (wasRemoved) {
         this.event.groupChanged.notify(key);
         
-        if (group.length === 0) {
+        if (group.size() === 0) {
           delete this.entries[key];
           this.event.groupRemoved.notify(key);
         }
       }
     }
-  },
-  
-  get: function(key) {
-    return this.entries[this.key(key)] || [];
   }
 });
 
@@ -247,10 +253,12 @@ $.extend(GroupedCollection.prototype, {
   },
   
   remove: function(item, suppressNotify) {
-    GroupedCollection.superClass.remove.call(this, item, suppressNotify);
-
-    for (var grouping in this.groupings) {
-      this.groupings[grouping].remove(item);
+    var wasRemoved = GroupedCollection.superClass.remove.call(this, item, suppressNotify);
+    
+    if (wasRemoved) {
+      for (var grouping in this.groupings) {
+        this.groupings[grouping].remove(item);
+      }
     }
   },
   
