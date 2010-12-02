@@ -24,9 +24,9 @@ $(function() {
   	expect(2);
   	var grouping = new Grouping('prop');
   	var obj = {prop: 'x'};
-  	grouping.add(obj);
-  	equal(grouping.entries['x'].size(), 1, 'Tasks in group');
-    ok(grouping.entries['x'].items[0] == obj, 'Object in group');
+  	grouping.addToGroup(obj);
+  	equal(grouping.get('x').size(), 1, 'Tasks in group');
+    ok(grouping.get('x').all()[0] == obj, 'Object in group');
   });
 
   test('Remove item from grouping' , function(){
@@ -34,18 +34,18 @@ $(function() {
   	var grouping = new Grouping('prop');
   	var obj1 = {prop: 'x'};
   	var obj2 = {prop: 'x'};
-  	grouping.add(obj1);
-  	grouping.add(obj2);
-  	grouping.remove(obj1);
-    equal(1, grouping.entries['x'].size(), 'Item removed');
+  	grouping.addToGroup(obj1);
+  	grouping.addToGroup(obj2);
+  	grouping.removeFromGroup(obj1);
+    equal(1, grouping.get('x').size(), 'Item removed');
   });
   
   test('Remove last item from grouping' , function(){
   	expect(1);
   	var grouping = new Grouping('prop');
   	var obj = {prop: 'x'};
-  	grouping.add(obj);
-  	grouping.remove(obj);
-    equal(null, grouping.entries['x'], 'Group deleted');
+  	grouping.addToGroup(obj);
+  	grouping.removeFromGroup(obj);
+    equal(null, grouping.get('x'), 'Group deleted');
   });
 });

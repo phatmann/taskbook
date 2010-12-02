@@ -81,6 +81,10 @@ Collection.prototype = {
     return true;
   },
   
+  all: function() {
+    return this.items;
+  },
+  
   size: function() {
     return this.items.length;
   },
@@ -106,14 +110,13 @@ function Index(property) {
   this.property = property;
 }
 
+Index.key = function(prop) {
+  return prop.toKey ? prop.toKey() : prop.toString();
+};
+
 Index.prototype = {
-  key: function(prop) {
-    return prop.toKey ? prop.toKey() : prop.toString();
-  },
-  
   propertyKey: function(obj) {
-    var prop = obj[this.property];
-    return this.key(prop);
+    return Index.key(obj[this.property]);
   },
   
   add: function(obj) {
@@ -125,7 +128,7 @@ Index.prototype = {
   },
   
   get: function(key) {
-    return this.entries[this.key(key)];
+    return this.entries[Index.key(key)];
   },
   
   keys: function() {
@@ -154,24 +157,23 @@ subclass(IndexedCollection, Collection);
 
 $.extend(IndexedCollection.prototype, {
   add: function(item, suppressNotify) {
-    item.collection   = this;
-    item.itemID       = this.nextItemID++;
-    IndexedCollection.superClass.add.call(this, item, suppressNotify);
-    this.idIndex.add(item);
+    if (!item.itemID) {
+      item.itemID = this.nextItemID++;
+    }
+    
+    if (!this.get(item.itemID)) {
+      IndexedCollection.superClass.add.call(this, item, suppressNotify);
+      this.idIndex.add(item);
+    }
   },
   
   remove: function(item, suppressNotify) {
     this.idIndex.remove(item);
-    item.collection = null;
     return IndexedCollection.superClass.remove.call(this, item, suppressNotify);
   },
 
   get: function(id) {
     return this.idIndex.get(id);
-  },
-  
-  all: function() {
-    return this.items;
   },
   
   beforeItemChanged: function(item, properties) {
@@ -186,47 +188,50 @@ $.extend(IndexedCollection.prototype, {
 Event.map(IndexedCollection.prototype, ['itemChanged']);
 
 function Grouping(property) {
-  Grouping.baseConstructor.call(this, property);
+  Grouping.baseConstructor.call(this);
+  this.property = property;
 }
 
-subclass(Grouping, Index);
+subclass(Grouping, IndexedCollection);
     
 $.extend(Grouping.prototype, {
-  groups: Grouping.superClass.keys,
-  
-  add: function(obj) {
+  addToGroup: function(obj) {
     var key = this.propertyKey(obj);
-    var group = this.entries[key];
+    var group = this.get(key);
     
     if (!group) {
-      group = this.entries[key] = new Collection();
-      this.event.groupAdded.notify(key);
+      group = new Collection();
+      group.itemID = key;
+      this.add(group);
     }
     
     group.add(obj);
-    this.event.groupChanged.notify(key);
+    //this.event.itemChanged.notify(key);
   },
   
-  remove: function(obj) {
+  removeFromGroup: function(obj) {
     var key = this.propertyKey(obj);
-    var group = this.entries[key];
+    var group = this.get(key);
       
     if (group) {
       var wasRemoved = group.remove(obj);
   
       if (wasRemoved) {
-        this.event.groupChanged.notify(key);
+        //this.event.itemChanged.notify(key);
         
         if (group.size() === 0) {
-          delete this.entries[key];
-          this.event.groupRemoved.notify(key);
+          this.remove(group);
         }
       }
     }
+  },
+  
+  propertyKey: function(obj) {
+    return Index.key(obj[this.property]);
   }
 });
 
-Event.map(Grouping.prototype, ['groupChanged', 'groupAdded', 'groupRemoved']);
+//Event.map(Grouping.prototype, ['itemChanged', 'itemAdded', 'itemRemoved']);
 
 function GroupedCollection(props) {
   GroupedCollection.baseConstructor.call(this, props);
@@ -248,7 +253,7 @@ $.extend(GroupedCollection.prototype, {
     GroupedCollection.superClass.add.call(this, item, suppressNotify);
     
     for (var grouping in this.groupings) {
-      this.groupings[grouping].add(item);
+      this.groupings[grouping].addToGroup(item);
     }
   },
   
@@ -257,7 +262,7 @@ $.extend(GroupedCollection.prototype, {
     
     if (wasRemoved) {
       for (var grouping in this.groupings) {
-        this.groupings[grouping].remove(item);
+        this.groupings[grouping].removeFromGroup(item);
       }
     }
   },
@@ -272,10 +277,10 @@ $.extend(GroupedCollection.prototype, {
   
   groups: function(property) {
     if (this.grouping(property)) {
-      return this.grouping(property).groups();
+      return this.grouping(property).all();
     }
       
-    return [];
+    return null;
   },
   
   beforeItemChanged: function(item, properties) {
@@ -303,8 +308,36 @@ $.extend(GroupedCollection.prototype, {
   }
 });
 
+function MergedCollection(collections) {
+  MergedCollection.baseConstructor.call(this);
+  
+  var self = this;
+  
+  function add(collection, item) {
+    self.add(item);
+  }
+  
+  function remove(collection, item) {
+    self.remove(item);
+  }
+  
+  for (var i = 0; i < arguments.length; ++i) {
+    var collection = arguments[i];
+    var items = collection.all();
+    
+    for (var j = 0; j < items.length; ++j) {
+      this.add(items[j]);
+    }
+    
+    collection.event.itemAdded.attach(add);
+    collection.event.itemRemoved.attach(remove);
+  }
+}
+
+subclass(MergedCollection, IndexedCollection);
+
 Collection.Item = function(itemType, attrs) {
-  this.collection = null;
+  //this.collection = null;
   this.itemType   = itemType;
   this.itemID     = attrs ? attrs.itemID : null;
 };
@@ -313,7 +346,7 @@ Collection.Item.prototype = {
   setProperties: function(properties) {
     this.collection.beforeItemChanged(this, properties);
     $.extend(this, properties);
-    this.collection.itemChanged(this, properties);
+    //this.collection.itemChanged(this, properties);
   },
   
   setProperty: function(property, value) {

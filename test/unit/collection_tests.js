@@ -56,10 +56,10 @@ $(function() {
   });
   
   test('Get item', function() {
-    expect(2);
+    expect(1);
     var item = collection.items[0];
     equal(collection.get(item.itemID).itemID, item.itemID, 'ID of fetched item');
-    ok(collection == item.collection, 'Fetched item refers to collection');
+    //ok(collection == item.collection, 'Fetched item refers to collection');
   });
   
   test('Group by a property', function() {
@@ -80,7 +80,7 @@ $(function() {
     expect(2);
     var groups = collection.groups('prop1');
     equal(2, groups.length);
-    equal('2010-01-01', groups[0]);
+    equal('2010-01-01', groups[0].itemID);
   });
   
   test('Remove item from collection and group', function() {

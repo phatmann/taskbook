@@ -1,9 +1,9 @@
-/*global GroupedCollection Task subclass */
+/*global GroupedCollection MergedCollection Task subclass */
 
 function TaskBook(bookID) {
   TaskBook.baseConstructor.call(this, {collectionID:'taskbook_' + bookID, groupings:['startDate', 'dueDate']});
   this.metadata({currentDate: null});
-  this.dateGroups = null;
+  this.dateGroups = new MergedCollection(this.grouping('startDate'), this.grouping('dueDate'));
 }
 
 subclass(TaskBook, GroupedCollection);
@@ -18,12 +18,8 @@ $.extend(TaskBook.prototype, {
   },
   
   activeDates: function() {
-      // TODO: update incrementally
-    
-    //if (!this.dateGroups) {
-      this.dateGroups = this.groups('startDate').concat(this.groups('dueDate')).unique().sort();
-    //}
-    
-    return this.dateGroups;
+    return $.map(this.dateGroups.all(), function() {
+      return this.itemID;
+    });
   }
 });
