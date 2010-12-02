@@ -7,6 +7,8 @@ function Collection(props) {
   
   this.items          = props.items || [];
   this.collectionID   = props.collectionID;  
+  
+  Event.map(this, ['itemAdded', 'itemRemoved', 'metadataChanged']);
 }
 
 Collection.prototype = {
@@ -103,8 +105,6 @@ Collection.prototype = {
   }
 };
 
-Event.map(Collection.prototype, ['itemAdded', 'itemRemoved', 'metadataChanged']);
-
 function Index(property) {
   this.entries  = {};
   this.property = property;
@@ -151,6 +151,8 @@ function IndexedCollection(props) {
        this.nextItemID = 1;
      }
   }
+  
+  Event.map(this, ['itemChanged']);
 }
 
 subclass(IndexedCollection, Collection);
@@ -184,8 +186,6 @@ $.extend(IndexedCollection.prototype, {
     this.event.itemChanged.notify(item);
   }
 });
-
-Event.map(IndexedCollection.prototype, ['itemChanged']);
 
 function Grouping(property) {
   Grouping.baseConstructor.call(this);
@@ -230,8 +230,6 @@ $.extend(Grouping.prototype, {
     return Index.key(obj[this.property]);
   }
 });
-
-//Event.map(Grouping.prototype, ['itemChanged', 'itemAdded', 'itemRemoved']);
 
 function GroupedCollection(props) {
   GroupedCollection.baseConstructor.call(this, props);
@@ -313,11 +311,11 @@ function MergedCollection(collections) {
   
   var self = this;
   
-  function add(collection, item) {
+  function itemAdded(collection, item) {
     self.add(item);
   }
   
-  function remove(collection, item) {
+  function itemRemoved(collection, item) {
     self.remove(item);
   }
   
@@ -326,11 +324,11 @@ function MergedCollection(collections) {
     var items = collection.all();
     
     for (var j = 0; j < items.length; ++j) {
-      this.add(items[j]);
+      this.add(items[j], true);
     }
     
-    collection.event.itemAdded.attach(add);
-    collection.event.itemRemoved.attach(remove);
+    collection.event.itemAdded.attach(itemAdded);
+    collection.event.itemRemoved.attach(itemRemoved);
   }
 }
 
