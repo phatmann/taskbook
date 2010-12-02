@@ -1,4 +1,4 @@
-/*global subclass Collection */
+/*global subclass Collection GroupedCollection */
 
 function TestItem(props) {
   TestItem.baseConstructor.call(this, 'TestItem');
@@ -20,7 +20,7 @@ $(function() {
       var item2 = new TestItem({name: 'name2', prop1:'2010-01-01', prop2:'2010-04-01'});
       var item3 = new TestItem({name: 'name3', prop1:'2010-02-01', prop2:'2010-03-01'});
       
-      collection = new Collection({collectionID:'test', groupings:['prop1', 'prop2']});
+      collection = new GroupedCollection({collectionID:'test', groupings:['prop1', 'prop2']});
       collection.add(item1);
       collection.add(item2);
       collection.add(item3);

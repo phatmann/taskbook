@@ -1,4 +1,4 @@
-/*global Collection Task subclass */
+/*global GroupedCollection Task subclass */
 
 function TaskBook(bookID) {
   TaskBook.baseConstructor.call(this, {collectionID:'taskbook_' + bookID, groupings:['startDate', 'dueDate']});
@@ -6,7 +6,7 @@ function TaskBook(bookID) {
   this.dateGroups = null;
 }
 
-subclass(TaskBook, Collection);
+subclass(TaskBook, GroupedCollection);
 
 $.extend(TaskBook.prototype, {
   currentDate: function(date) {

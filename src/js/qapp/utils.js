@@ -117,7 +117,9 @@ var Event = function(sender) {
 };
 
 Event.map = function(sender, events) {
-  sender.event = {};
+  if (!sender.event) {
+    sender.event = {};
+  }
   
   for (var i = 0; i < events.length; ++i) {
     sender.event[events[i]] = new Event(sender);
