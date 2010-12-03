@@ -68,14 +68,6 @@ $.extend(TasksView.prototype, {
       self.fillDateSelect();
     });
     
-    self.controller.book.grouping('startDate').bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
-      self.fillActions();
-    });
-    
-    self.controller.book.grouping('dueDate').bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
-      self.fillDueTasks();
-    });
-    
     $('#calendarPopup').datepicker({
       dateFormat: 'yy-m-d',
       onSelect: function(date) {
@@ -96,6 +88,32 @@ $.extend(TasksView.prototype, {
   },
     
   currentDateChange: function(props) {
+    if (this.startDateGroup) {
+      this.startDateGroup.unbindEvent('itemAdded itemRemoved itemChanged');
+    }
+    
+    if (this.dueDateGroup) {
+      this.dueDateGroup.unbindEvent('itemAdded itemRemoved itemChanged');
+    }
+    
+    var date            = this.controller.book.currentDate();
+    this.startDateGroup = this.controller.book.group('startDate', date);
+    this.dueDateGroup   = this.controller.book.group('dueDate', date);
+    
+    var self= this;
+    
+    if (this.startDateGroup) {
+      this.startDateGroup.bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
+        self.fillActions();
+      });
+    }
+    
+    if (this.dueDateGroup) {
+      this.dueDateGroup.bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
+        self.fillDueTasks();
+      });
+    }
+    
     this.fillActions();
     this.fillDueTasks();
   },

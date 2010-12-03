@@ -110,6 +110,10 @@ Collection.prototype = {
   
   bindEvent: function(event, handler) {
     $(this).bind(event, handler);
+  },
+  
+  unbindEvent: function(event) {
+    $(this).unbind(event);
   }
 };
 
