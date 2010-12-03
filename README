@@ -1,1 +1,14 @@
 A new way to slice up tasks
+
+TODO:
+* Use timestamp instead of serial ID
+* Store updated timestamp
+* Provide way to merge two collections (for sync)
+* Get rid of owners field, use event binding instead
+* Get rid of itemXXX events, just use changed events for collection and item?
+* Provide sync back-end based on node.js
+* Switch to customizable views displayed singly:
+  * Pagination
+  * Sorting
+  * Goal/action display
+  * Filter

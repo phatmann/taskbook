@@ -41,25 +41,23 @@ $(function() {
   
   
   test('Load collection from storage' , function() {
-  	expect(3);
+  	expect(2);
   	collection.save();
   	var collection2 = new Collection({collectionID:'test'});
   	collection2.load();
   	console.log(collection2.items);
   	equal(collection2.items.length, collection.items.length, 'Items in loaded collection');
   	equal(collection2.items[0].name, collection.items[0].name, 'First item was loaded correctly');
-  	ok(collection2 == collection2.items[0].collection, 'First item refers to collection');
   });
   
   test('Auto-assign item ID', function() {
-    equal(2, collection.items[1].itemID, 'Second item ID should be 2');
+    ok(collection.items[1].itemID, 'Second item ID is set to timestamp');
   });
   
   test('Get item', function() {
     expect(1);
     var item = collection.items[0];
     equal(collection.get(item.itemID).itemID, item.itemID, 'ID of fetched item');
-    //ok(collection == item.collection, 'Fetched item refers to collection');
   });
   
   test('Group by a property', function() {

@@ -3,19 +3,28 @@
 function Item(itemType, props) {
   this.itemType   = itemType;
   this.itemID     = props ? props.itemID : null;
+  this.updatedAt  = Item.timestamp();
   this.owners     = [];
 }
 
+Item.timestamp = function() {
+  // TODO: avoid creating new Date every time
+  return new Date().getTime();
+};
+
 Item.prototype = {
-  setProperties: function(properties) {
+  setProperties: function(properties, suppressNotify) {
     for (var i = 0; i < this.owners.length; ++i) {
       this.owners[i].beforeItemChanged(this, properties);
     }
     
     $.extend(this, properties);
+    this.updatedAt = Item.timestamp();
     
-    for (i = 0; i < this.owners.length; ++i) {
-      this.owners[i].itemChanged(this, properties);
+    if (!suppressNotify) {
+      for (i = 0; i < this.owners.length; ++i) {
+        this.owners[i].itemChanged(this, properties);
+      }
     }
   },
   
@@ -81,7 +90,6 @@ $.extend(Collection.prototype, {
         if (value && typeof value === 'object' && value.itemType) {
             // Revive item classes
             var item = new window[value.itemType](value);
-            item.collection = self;
             return item;
         }
         return value;
@@ -201,28 +209,24 @@ Index.prototype = {
 function IndexedCollection(props) {
   IndexedCollection.baseConstructor.call(this, props); 
   this.idIndex = new Index('itemID');
-  this._fetchNextID();
 }
 
 subclass(IndexedCollection, Collection);
 
+Item.ID_RANDOMNESS = 1000000;
+
+Item.prototype.generateID = function() {
+  this.itemID = (Item.timestamp() * Item.ID_RANDOMNESS) + Math.floor(Math.random() * Item.ID_RANDOMNESS);
+}
+
 $.extend(IndexedCollection.prototype, {
-  _fetchNextID: function() {
-    if (this.items && this.items.length > 0) {
-     this.nextItemID  = this.items[this.items.length - 1].itemID + 1;
-    } else {
-     this.nextItemID = 1;
-    }
-  },
-  
   load: function() {
     IndexedCollection.superClass.load.call(this);
-    this._fetchNextID();
   },
   
   add: function(item, suppressNotify) {
     if (!item.itemID) {
-      item.itemID = this.nextItemID++;
+      item.generateID();
     }
     
     if (!this.get(item.itemID)) {
