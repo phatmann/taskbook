@@ -62,6 +62,10 @@ View.prototype = {
   },
   
   fillList: function(listElement, list) {
+    if (!list) {
+      return;
+    }
+    
     var templateRow = listElement.data('template');
     
     if (!templateRow) {

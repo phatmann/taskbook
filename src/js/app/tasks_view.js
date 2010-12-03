@@ -1,3 +1,5 @@
+/*global subclass View YMD */
+
 function TasksView(controller) {
   TasksView.baseConstructor.call(this, controller);
   this.router();
@@ -46,43 +48,43 @@ $.extend(TasksView.prototype, {
     //   self.dismissPopups();
     // });
   
-    self.controller.book.event.metadataChanged.attach(function(book){
+    self.controller.book.bindEvent('metadataChanged', function(e) {
       self.currentDateChange();
     });
     
-    self.controller.book.event.itemAdded.attach(function(book, item){
+    self.controller.book.bindEvent('itemAdded', function(e, task){
       self.bookChange();
     });
     
-    self.controller.book.event.itemRemoved.attach(function(book, item){
+    self.controller.book.bindEvent('itemRemoved', function(e, task){
       self.bookChange();
     });
   
-    self.controller.book.event.itemChanged.attach(function(book, task){
+    self.controller.book.bindEvent('itemChanged', function(e, task){
       self.taskChange(task);
     });
     
-    self.controller.book.grouping('startDate').event.groupAdded.attach(function(book, task){
+    self.controller.book.grouping('startDate').bindEvent('itemAdded', function(book, task){
       self.fillDateSelect();
     });
     
-    self.controller.book.grouping('dueDate').event.groupAdded.attach(function(book, task){
+    self.controller.book.grouping('dueDate').bindEvent('itemAdded', function(book, task){
       self.fillDateSelect();
     });
     
-    self.controller.book.grouping('startDate').event.groupRemoved.attach(function(book, task){
+    self.controller.book.grouping('startDate').bindEvent('itemRemoved', function(book, task){
       self.fillDateSelect();
     });
     
-    self.controller.book.grouping('dueDate').event.groupRemoved.attach(function(book, task){
+    self.controller.book.grouping('dueDate').bindEvent('itemRemoved', function(book, task){
       self.fillDateSelect();
     });
     
-    self.controller.book.grouping('startDate').event.groupChanged.attach(function(book, task){
+    self.controller.book.grouping('startDate').bindEvent('itemChanged', function(book, task){
       self.fillActions();
     });
     
-    self.controller.book.grouping('dueDate').event.groupChanged.attach(function(book, task){
+    self.controller.book.grouping('dueDate').bindEvent('itemChanged', function(book, task){
       self.fillDueTasks();
     });
     
@@ -188,12 +190,24 @@ $.extend(TasksView.prototype, {
     this.dateSelect.val(this.controller.book.currentDate());
   },
   
+  fillDateList: function(dateProp, list) {
+    var date = this.controller.book.currentDate();
+    
+    if (date) {
+      var group = this.controller.book.group(dateProp, date);
+      
+      if (group) {
+        this.fillList(list, group.all());
+      }
+    }
+  },
+  
   fillActions: function() {
-    this.fillList(this.actionList, this.controller.book.group('startDate', this.controller.book.currentDate()));
+    this.fillDateList('startDate', this.actionList);
   },
   
   fillDueTasks: function() {
-    this.fillList(this.dueTaskList, this.controller.book.group('dueDate', this.controller.book.currentDate()));
+    this.fillDateList('dueDate', this.dueTaskList);
   },
   
   selectedDate: function() {

@@ -1,4 +1,4 @@
-/*global subclass Event */
+/*global subclass */
 
 function Collection(props) {
   if (!props) {
@@ -8,7 +8,7 @@ function Collection(props) {
   this.items          = props.items || [];
   this.collectionID   = props.collectionID;  
   
-  Event.map(this, ['itemAdded', 'itemRemoved', 'metadataChanged']);
+  //Event.map(this, ['itemAdded', 'itemRemoved', 'metadataChanged']);
 }
 
 Collection.prototype = {
@@ -17,7 +17,7 @@ Collection.prototype = {
       console.log("No collection ID, cannot save");
     }
     
-    var stored = {items: this.items, meta: this.meta};
+    var stored = {items: this.items, metadata: this._metadata};
     
     stored = JSON.stringify(stored, function(key, value) {
       if (key == 'collection') {
@@ -49,7 +49,7 @@ Collection.prototype = {
         return value;
       });
       
-      this.meta  = stored.meta || {};
+      this._metadata  = stored.metadata;
       this.items = [];
       
       // TODO: cache groupings?
@@ -63,7 +63,7 @@ Collection.prototype = {
     this.items.push(item);
     
     if (!suppressNotify) { 
-      this.event.itemAdded.notify(item);
+      this.triggerEvent('itemAdded', item);
     }
   },
   
@@ -77,7 +77,7 @@ Collection.prototype = {
     this.items.splice(index, 1);
     
     if (!suppressNotify) { 
-      this.event.itemRemoved.notify(item);
+      this.triggerEvent('itemRemoved', item);
     }
     
     return true;
@@ -98,10 +98,18 @@ Collection.prototype = {
     
     if (props) {
       $.extend(this._metadata, props);
-      this.event.metadataChanged.notify();
+      this.triggerEvent('metadataChanged');
     }
     
     return this._metadata;
+  },
+  
+  triggerEvent: function(event, arg) {
+    $(this).triggerHandler(event, arg);
+  },
+  
+  bindEvent: function(event, handler) {
+    $(this).bind(event, handler);
   }
 };
 
@@ -127,8 +135,8 @@ Index.prototype = {
     delete this.entries[this.propertyKey(obj)];
   },
   
-  get: function(key) {
-    return this.entries[Index.key(key)];
+  get: function(prop) {
+    return this.entries[Index.key(prop)];
   },
   
   keys: function() {
@@ -152,7 +160,7 @@ function IndexedCollection(props) {
      }
   }
   
-  Event.map(this, ['itemChanged']);
+  //Event.map(this, ['itemChanged']);
 }
 
 subclass(IndexedCollection, Collection);
@@ -183,7 +191,7 @@ $.extend(IndexedCollection.prototype, {
   
   itemChanged: function(item, properties) {
     this.save();
-    this.event.itemChanged.notify(item);
+    this.sendEvent('itemChanged', item);
   }
 });
 
@@ -327,8 +335,8 @@ function MergedCollection(collections) {
       this.add(items[j], true);
     }
     
-    collection.event.itemAdded.attach(itemAdded);
-    collection.event.itemRemoved.attach(itemRemoved);
+    collection.bindEvent('itemAdded', itemAdded);
+    collection.bindEvent('itemRemoved', itemRemoved);
   }
 }
 
