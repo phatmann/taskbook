@@ -64,12 +64,12 @@ $.extend(TasksView.prototype, {
       self.taskChange(task);
     });
     
-    self.controller.book.dateGroups.bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
+    self.controller.book.dateGroups.bindEvent('itemAdded itemRemoved itemChanged', function(e, task){
       self.fillDateSelect();
     });
     
     $('#calendarPopup').datepicker({
-      dateFormat: 'yy-m-d',
+      dateFormat: 'yy-mm-dd',
       onSelect: function(date) {
         self.dateChange(date);
       }

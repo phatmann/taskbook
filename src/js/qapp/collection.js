@@ -29,7 +29,9 @@ Item.prototype = {
   },
   
   setProperty: function(property, value) {
-    this.setProperties({property: value});
+    var p = {};
+    p[property] = value;
+    this.setProperties(p);
   },
   
   addOwner: function(owner) {
@@ -217,7 +219,7 @@ Item.ID_RANDOMNESS = 1000000;
 
 Item.prototype.generateID = function() {
   this.itemID = (Item.timestamp() * Item.ID_RANDOMNESS) + Math.floor(Math.random() * Item.ID_RANDOMNESS);
-}
+};
 
 $.extend(IndexedCollection.prototype, {
   load: function() {
@@ -242,9 +244,6 @@ $.extend(IndexedCollection.prototype, {
 
   get: function(id) {
     return this.idIndex.get(id);
-  },
-  
-  beforeItemChanged: function(item, properties) {
   },
   
   itemChanged: function(item, properties) {
@@ -353,7 +352,7 @@ $.extend(GroupedCollection.prototype, {
       var grouping = this.groupings[property];
     
       if (grouping) {
-        grouping.remove(item);
+        grouping.removeFromGroup(item);
       }
     }
   },
@@ -365,7 +364,7 @@ $.extend(GroupedCollection.prototype, {
       var grouping = this.groupings[property];
     
       if (grouping) {
-        grouping.add(item);
+        grouping.addToGroup(item);
       }
     }
   }

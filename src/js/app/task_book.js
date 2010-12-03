@@ -20,6 +20,6 @@ $.extend(TaskBook.prototype, {
   activeDates: function() {
     return $.map(this.dateGroups.all(), function(item) {
       return item.itemID;
-    });
+    }).sort();
   }
 });
