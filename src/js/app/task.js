@@ -1,42 +1,42 @@
-/*global subclass Collection YMD */
+/*global subclass Item YMD */
 
 var DUE_DATE_DAYS_AHEAD = 30;
 
-function Task(attrs) {
-  if (typeof attrs === 'string') {
-    attrs = {goal:attrs};
+function Task(props) {
+  if (typeof props === 'string') {
+    props = {goal:props};
   }
   
-  Task.baseConstructor.call(this, 'Task', attrs);
+  Task.baseConstructor.call(this, 'Task', props);
   
-  this.goal             = attrs.goal;
-  this.action           = attrs.action;
+  this.goal             = props.goal;
+  this.action           = props.action;
   this.completionDate   = null;
   
-  if (attrs.createDate) {
-    this.createDate = attrs.createDate;
+  if (props.createDate) {
+    this.createDate = props.createDate;
   } else {
     this.createDate = YMD.now().toString();
   }
   
-  if (attrs.startDate) {
-    this.startDate = attrs.startDate;
+  if (props.startDate) {
+    this.startDate = props.startDate;
   } else {
     this.startDate = this.createDate;
   }
   
-  if (attrs.dueDate) {
-    this.dueDate = attrs.dueDate;
+  if (props.dueDate) {
+    this.dueDate = props.dueDate;
   } else {
     this.dueDate = new YMD(this.startDate).addDays(DUE_DATE_DAYS_AHEAD).toString();
   }
   
-  if (attrs.completionDate) {
-    this.completionDate = attrs.completionDate;
+  if (props.completionDate) {
+    this.completionDate = props.completionDate;
   }
 }
 
-subclass(Task, Collection.Item);
+subclass(Task, Item);
 
 $.extend(Task.prototype, { 
   toggleComplete: function() {

@@ -119,6 +119,8 @@ $.extend(TasksView.prototype, {
   },
   
   taskChange: function(task) {
+    this.controller.book.save(); // TODO: move out of view!
+    
     var taskRows = $('[value=' + task.itemID + ']');
     var self = this;
     

@@ -1,4 +1,11 @@
-/*globalIndex Grouping */
+/*global subclass Index Item Grouping */
+
+function IndexTestItem(props) {
+  IndexTestItem.baseConstructor.call(this, 'IndexTestItem', props);
+  this.prop = props.prop;
+}
+
+subclass(IndexTestItem, Item);
 
 $(function() {
   module('Index');
@@ -23,7 +30,7 @@ $(function() {
   test('Add to grouping' , function(){
   	expect(2);
   	var grouping = new Grouping('prop');
-  	var obj = {prop: 'x'};
+  	var obj = new IndexTestItem({prop: 'x'});
   	grouping.addToGroup(obj);
   	equal(grouping.get('x').size(), 1, 'Tasks in group');
     ok(grouping.get('x').all()[0] == obj, 'Object in group');
@@ -32,8 +39,8 @@ $(function() {
   test('Remove item from grouping' , function(){
   	expect(1);
   	var grouping = new Grouping('prop');
-  	var obj1 = {prop: 'x'};
-  	var obj2 = {prop: 'x'};
+  	var obj1 = new IndexTestItem({prop: 'x'});
+  	var obj2 = new IndexTestItem({prop: 'x'});
   	grouping.addToGroup(obj1);
   	grouping.addToGroup(obj2);
   	grouping.removeFromGroup(obj1);
@@ -43,7 +50,7 @@ $(function() {
   test('Remove last item from grouping' , function(){
   	expect(1);
   	var grouping = new Grouping('prop');
-  	var obj = {prop: 'x'};
+  	var obj = new IndexTestItem({prop: 'x'});
   	grouping.addToGroup(obj);
   	grouping.removeFromGroup(obj);
     equal(null, grouping.get('x'), 'Group deleted');

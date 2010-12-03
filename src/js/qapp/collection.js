@@ -1,17 +1,55 @@
 /*global subclass */
 
+function Item(itemType, props) {
+  this.itemType   = itemType;
+  this.itemID     = props ? props.itemID : null;
+  this.owners     = [];
+}
+
+Item.prototype = {
+  setProperties: function(properties) {
+    for (var i = 0; i < this.owners.length; ++i) {
+      this.owners[i].beforeItemChanged(this, properties);
+    }
+    
+    $.extend(this, properties);
+    
+    for (i = 0; i < this.owners.length; ++i) {
+      this.owners[i].itemChanged(this, properties);
+    }
+  },
+  
+  setProperty: function(property, value) {
+    this.setProperties({property: value});
+  },
+  
+  addOwner: function(owner) {
+    this.owners.push(owner);
+  },
+  
+  removeOwner: function(owner) {
+    var index = this.owners.indexOf(owner);
+    
+    if (index != -1) {
+      this.owners.splice(index, 1);
+    }
+  }
+};
+
 function Collection(props) {
+  Collection.baseConstructor.call(this, 'Collection', props);
+  
   if (!props) {
     props = {};
   }
   
   this.items          = props.items || [];
   this.collectionID   = props.collectionID;  
-  
-  //Event.map(this, ['itemAdded', 'itemRemoved', 'metadataChanged']);
 }
 
-Collection.prototype = {
+subclass(Collection, Item);
+
+$.extend(Collection.prototype, {
   save: function() {
     if (!this.collectionID) {
       console.log("No collection ID, cannot save");
@@ -20,7 +58,7 @@ Collection.prototype = {
     var stored = {items: this.items, metadata: this._metadata};
     
     stored = JSON.stringify(stored, function(key, value) {
-      if (key == 'collection') {
+      if (key == 'owners') {
         return undefined;
       } else {
         return value;
@@ -61,6 +99,7 @@ Collection.prototype = {
   
   add: function(item, suppressNotify) {
     this.items.push(item);
+    item.addOwner(this);
     
     if (!suppressNotify) { 
       this.triggerEvent('itemAdded', item);
@@ -75,6 +114,7 @@ Collection.prototype = {
     }
     
     this.items.splice(index, 1);
+    item.removeOwner(this);
     
     if (!suppressNotify) { 
       this.triggerEvent('itemRemoved', item);
@@ -114,8 +154,14 @@ Collection.prototype = {
   
   unbindEvent: function(event) {
     $(this).unbind(event);
+  },
+  
+  beforeItemChanged: function(item, properties) {
+  },
+  
+  itemChanged: function(item, properties) {
   }
-};
+});
 
 function Index(property) {
   this.entries  = {};
@@ -198,8 +244,7 @@ $.extend(IndexedCollection.prototype, {
   },
   
   itemChanged: function(item, properties) {
-    this.save();
-    this.sendEvent('itemChanged', item);
+    this.triggerEvent('itemChanged', item);
   }
 });
 
@@ -349,22 +394,4 @@ function MergedCollection(collections) {
 }
 
 subclass(MergedCollection, IndexedCollection);
-
-Collection.Item = function(itemType, attrs) {
-  //this.collection = null;
-  this.itemType   = itemType;
-  this.itemID     = attrs ? attrs.itemID : null;
-};
-
-Collection.Item.prototype = {
-  setProperties: function(properties) {
-    this.collection.beforeItemChanged(this, properties);
-    $.extend(this, properties);
-    //this.collection.itemChanged(this, properties);
-  },
-  
-  setProperty: function(property, value) {
-    this.setProperties({property: value});
-  }
-};
   
