@@ -151,21 +151,25 @@ Index.prototype = {
 function IndexedCollection(props) {
   IndexedCollection.baseConstructor.call(this, props); 
   this.idIndex = new Index('itemID');
-
-  if (!this.nextItemID) {
-     if (this.items && this.items.length > 0) {
-       this.nextItemID  = this.items[this.items.length - 1].itemID + 1;
-     } else {
-       this.nextItemID = 1;
-     }
-  }
-  
-  //Event.map(this, ['itemChanged']);
+  this._fetchNextID();
 }
 
 subclass(IndexedCollection, Collection);
 
 $.extend(IndexedCollection.prototype, {
+  _fetchNextID: function() {
+    if (this.items && this.items.length > 0) {
+     this.nextItemID  = this.items[this.items.length - 1].itemID + 1;
+    } else {
+     this.nextItemID = 1;
+    }
+  },
+  
+  load: function() {
+    IndexedCollection.superClass.load.call(this);
+    this._fetchNextID();
+  },
+  
   add: function(item, suppressNotify) {
     if (!item.itemID) {
       item.itemID = this.nextItemID++;

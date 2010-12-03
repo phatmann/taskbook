@@ -62,10 +62,6 @@ View.prototype = {
   },
   
   fillList: function(listElement, list) {
-    if (!list) {
-      return;
-    }
-    
     var templateRow = listElement.data('template');
     
     if (!templateRow) {
@@ -74,6 +70,10 @@ View.prototype = {
     }
     
     listElement.html('');
+    
+    if (!list) {
+      return;
+    }
     
     for (var i = 0; i < list.length; ++i) {
       var item = list[i];

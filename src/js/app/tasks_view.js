@@ -64,27 +64,15 @@ $.extend(TasksView.prototype, {
       self.taskChange(task);
     });
     
-    self.controller.book.grouping('startDate').bindEvent('itemAdded', function(book, task){
+    self.controller.book.dateGroups.bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
       self.fillDateSelect();
     });
     
-    self.controller.book.grouping('dueDate').bindEvent('itemAdded', function(book, task){
-      self.fillDateSelect();
-    });
-    
-    self.controller.book.grouping('startDate').bindEvent('itemRemoved', function(book, task){
-      self.fillDateSelect();
-    });
-    
-    self.controller.book.grouping('dueDate').bindEvent('itemRemoved', function(book, task){
-      self.fillDateSelect();
-    });
-    
-    self.controller.book.grouping('startDate').bindEvent('itemChanged', function(book, task){
+    self.controller.book.grouping('startDate').bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
       self.fillActions();
     });
     
-    self.controller.book.grouping('dueDate').bindEvent('itemChanged', function(book, task){
+    self.controller.book.grouping('dueDate').bindEvent('itemAdded itemRemoved itemChanged', function(book, task){
       self.fillDueTasks();
     });
     
@@ -190,24 +178,21 @@ $.extend(TasksView.prototype, {
     this.dateSelect.val(this.controller.book.currentDate());
   },
   
-  fillDateList: function(dateProp, list) {
+  fillDateList: function(listElem, dateProp) {
     var date = this.controller.book.currentDate();
     
     if (date) {
       var group = this.controller.book.group(dateProp, date);
-      
-      if (group) {
-        this.fillList(list, group.all());
-      }
+      this.fillList(listElem, group ? group.all() : null);
     }
   },
   
   fillActions: function() {
-    this.fillDateList('startDate', this.actionList);
+    this.fillDateList(this.actionList, 'startDate');
   },
   
   fillDueTasks: function() {
-    this.fillDateList('dueDate', this.dueTaskList);
+    this.fillDateList(this.dueTaskList, 'dueDate');
   },
   
   selectedDate: function() {
